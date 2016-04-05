@@ -1,0 +1,31 @@
+{
+	"id" : "rabbit",
+  "cpus": 0.2,
+  "mem": 512,
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "rabbitmq:3",
+      "network": "BRIDGE",
+      "portMappings": [
+        {
+          "containerPort": 5672,
+          "hostPort": 0,
+          "protocol": "tcp"
+        }
+      ],
+      "forcePullImage": true
+    },
+    "volumes": [],
+    "args": [
+      "-d --hostname my-rabbit",
+      "--name some-rabbit"
+    ]
+  },
+  "env": {},
+  "labels": {},
+  "ports": [
+    5672
+  ],
+  "healthChecks": []
+}
