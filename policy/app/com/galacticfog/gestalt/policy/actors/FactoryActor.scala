@@ -42,7 +42,7 @@ class FactoryActor(
 
   def receive = LoggingReceive { handleRequests }
 
-  private val TICK_TIME = 30 seconds
+  private val TICK_TIME = 5 seconds
 
   override def preStart() = {
     context.system.scheduler.scheduleOnce( 1 second, self, CheckWorkers )
@@ -52,27 +52,47 @@ class FactoryActor(
 
     case CheckWorkers => {
 
+      Logger.debug( "Checking workers : " )
+      actorMap.foreach { entry =>
+        Logger.debug( "actor : " + entry._1 + " -> " + entry._2._2 )
+      }
+
       //scale up to the minimum number of workers
       if( actorMap.size < minWorkers ) {
-        for ( i <- actorMap.size to ( minWorkers - 1 ) ) {
+        for ( i <- actorMap.size until minWorkers ) {
           val id = UUID.randomUUID.toString
-          val actor = newWorkerActor( i, id, channel, queueName )
+          val actor = newWorkerActor( id, id, channel, queueName )
           actorMap += ( id -> (actor,0) )
         }
       }
 
       //if all the workers are at their max consumer workers consider scaling up
-      if(
-        actorMap.filter{ entry =>
-          entry._2._2 == MAX_CONSUMER_WORKERS
-        }
-          ==
-          maxWorkers )
+      val numFullWorkers =  actorMap.filter{ entry => entry._2._2 == MAX_CONSUMER_WORKERS }.size
+      if( numFullWorkers > 0 )
       {
         Logger.debug( "WOKERS MAXXED OUT SCALE UP!!!" )
+        if( numFullWorkers == maxWorkers )
+        {
+          Logger.debug( "MAX workers reached - considering allowing more" )
+        }
+        else
+        {
+          val actorId = UUID.randomUUID.toString
+          val actor = newWorkerActor( actorId, actorId, channel, queueName )
+          actorMap += ( actorId -> (actor, 0))
+        }
       }
 
-      //TODO : check the worker queue size and decide to scale up
+      //TODO : check times since workers were taxxed and scale down
+      val numEmptyWorkers = actorMap.filter{ entry => entry._2._2 == 0 }.size
+      if( numEmptyWorkers > 1 && actorMap.size > minWorkers )
+      {
+        Logger.debug( "WORKERS IDLE - SCALING DOWN...")
+        val entry = actorMap.filter{ entry => entry._2._2 == 0 }.head
+        context.system.stop( entry._2._1 )
+        actorMap -= entry._1
+      }
+
       context.system.scheduler.scheduleOnce( TICK_TIME, self, CheckWorkers )
     }
 
@@ -88,7 +108,7 @@ class FactoryActor(
 
   }
 
-  def newWorkerActor( n : Int, id : String, channel : Channel, queueName : String ) = {
+  def newWorkerActor( n : String, id : String, channel : Channel, queueName : String ) = {
     Logger.debug( s"newConsumerActor(( $n )" )
     context.actorOf( ConsumerActor.props( id, channel, queueName, MAX_CONSUMER_WORKERS ), name = s"consumer-actor-$n" )
   }

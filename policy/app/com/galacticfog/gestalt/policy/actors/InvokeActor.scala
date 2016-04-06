@@ -20,7 +20,9 @@ class InvokeActor( id : String, event : PolicyEvent, channel : Channel, envelope
     case IncomingEvent( event, channel, envelope ) => {
       Logger.debug( s"Consumer( $id ) - IncomingEvent : " + event.name  )
 
-      //TODO : do the damn thing
+      //TODO : do the damn thing instead of sleeping (simulating work)
+      Thread.sleep( 4000 )
+
 
       context.parent ! StopConsumerWorker( id )
     }

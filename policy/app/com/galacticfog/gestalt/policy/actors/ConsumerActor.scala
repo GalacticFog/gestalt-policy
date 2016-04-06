@@ -29,7 +29,7 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
       //TODO : this try may be unnecessary since we do the work in the actor no
       try {
         val message = new String(body, "UTF-8")
-        Logger.debug(" [x] Received '" + envelope.getRoutingKey() + "': tag :'" + envelope.getDeliveryTag + "':'" + message + "'")
+        Logger.trace(" [x] Received '" + envelope.getRoutingKey() + "': tag :'" + envelope.getDeliveryTag + "':'" + message + "'")
 
         //TODO : is this right?  We don't really care about the result, we just need to wait until we farm out the job
         val result = Await.result( self ? ConsumerEvent( message, channel, envelope ), Duration( 30, TimeUnit.SECONDS ) )
@@ -59,21 +59,21 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
     case StopConsumerWorker( id ) => {
       Logger.debug( "StopConsumerActor( " + id + " )" )
       val actor = actorMap.get( id ).get
-      context.parent ! UpdateConsumerWorkers( this.id, actorMap.size )
       context.system.stop( actor )
       actorMap -= id
+      context.parent ! UpdateConsumerWorkers( this.id, actorMap.size )
     }
 
     case ConsumerEvent( msg, channel, envelope ) => {
 
-      Logger.debug( "ActorMap Size : " + actorMap.size )
 
       if( actorMap.size == maxWorkers ) {
-        Logger.debug( "Rejecint Message - too many workers" )
+        Logger.trace( "Reject Message - too many workers" )
         channel.basicNack( envelope.getDeliveryTag, false, true )
         sender ! "done"
       }
       else {
+        Logger.debug( s"ActorMap Size( ${this.id} ) : " + actorMap.size )
         val event = Json.parse( msg ).validate[PolicyEvent] getOrElse {
           throw new Exception( "Failed to parse Policy event form event queue" )
         }
