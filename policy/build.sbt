@@ -12,4 +12,6 @@ libraryDependencies ++= Seq(
   ws
 )
 
+libraryDependencies += "com.rabbitmq" % "amqp-client" % "3.6.1"
+
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"

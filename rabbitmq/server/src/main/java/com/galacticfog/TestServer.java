@@ -9,6 +9,8 @@ import com.rabbitmq.client.MessageProperties;
 public class TestServer {
 
 	private static final String TASK_QUEUE_NAME = "task_queue";
+	private static final String EXCHANGE_NAME = "test-exchange";
+	private static final String ROUTE_KEY = "policy";
 
 	public static void main(String[] argv)
 		throws java.lang.Exception {
@@ -18,11 +20,11 @@ public class TestServer {
 			factory.setPort(10000);
 			Connection connection = factory.newConnection();
 			Channel channel = connection.createChannel();
-
-			channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
+			channel.exchangeDeclare( EXCHANGE_NAME, "direct" );
+			//channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
+			//channel.queueBind( TASK_QUEUE_NAME, EXCHANGE_NAME, ROUTE_KEY );
 
 			//String message = getMessage(argv);
-			
 			int MAX_MSGS = 20;
 			for( int i = 0; i < MAX_MSGS; ++i )
 			{
@@ -33,9 +35,7 @@ public class TestServer {
 
 				String message = hello + Integer.toString( i ) + dots;
 
-				channel.basicPublish( "", TASK_QUEUE_NAME,
-						MessageProperties.PERSISTENT_TEXT_PLAIN,
-						message.getBytes());
+				channel.basicPublish( EXCHANGE_NAME, ROUTE_KEY, null, message.getBytes());
 				System.out.println(" [x] Sent '" + message + "'");
 			}
 

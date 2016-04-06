@@ -5,6 +5,8 @@ import java.io.IOException;
 
 public class TestClient {
 	private static final String TASK_QUEUE_NAME = "task_queue";
+	private static final String EXCHANGE_NAME = "test-exchange";
+	private static final String ROUTE_KEY = "policy";
 
 	public static void main(String[] argv) throws Exception {
 		ConnectionFactory factory = new ConnectionFactory();
@@ -13,7 +15,9 @@ public class TestClient {
 		final Connection connection = factory.newConnection();
 		final Channel channel = connection.createChannel();
 
+		channel.exchangeDeclare( EXCHANGE_NAME, "direct" );
 		channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
+		channel.queueBind( TASK_QUEUE_NAME, EXCHANGE_NAME, ROUTE_KEY );
 		System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
 
 		channel.basicQos(1);
