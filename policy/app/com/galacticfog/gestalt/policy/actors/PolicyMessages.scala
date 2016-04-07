@@ -10,6 +10,8 @@ object PolicyMessages {
 
   case class IncomingEvent( event : PolicyEvent, channel : Channel, envelope : Envelope ) extends PolicyMessage
   case object CheckWorkers extends PolicyMessage
+  case object ShutdownConsumer extends PolicyMessage
+  case class RemoveConsumer( id : String ) extends PolicyMessage
 
   case class ConsumerEvent( msg : String, channel : Channel, evnelope : Envelope ) extends PolicyMessage
   case class UpdateConsumerWorkers( id : String, num : Int ) extends PolicyMessage

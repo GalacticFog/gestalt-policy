@@ -12,12 +12,12 @@ class PolicyFramework {
 object PolicyFramework {
 
   //TODO : remove defaults for local config and throw errors
-  val hostName      = sys.env.getOrElse( "rabbitHost", "192.168.200.20" )
-  val port          = sys.env.getOrElse( "rabbitPort", 10000 ).asInstanceOf[Int]
-  val exchangeName  = sys.env.getOrElse( "exchangeName", "test-exchange" )
-  val routeKey      = sys.env.getOrElse( "routeKey", "policy" )
-  val minWorkers    = sys.env.getOrElse( "minWorkers", 1 ).asInstanceOf[Int]
-  val maxWorkers    = sys.env.getOrElse( "maxWorkers", 3 ).asInstanceOf[Int]
+  val hostName      = sys.env.getOrElse( "RABBIT_HOST", "192.168.200.20" )
+  val port          = sys.env.getOrElse( "RABBIT_PORT", "10000" ).asInstanceOf[String].toInt
+  val exchangeName  = sys.env.getOrElse( "RABBIT_EXCHANGE", "test-exchange" )
+  val routeKey      = sys.env.getOrElse( "RABBIT_ROUTE", "policy" )
+  val minWorkers    = sys.env.getOrElse( "POLICY_MIN_WORKERS", "1" ).asInstanceOf[String].toInt
+  val maxWorkers    = sys.env.getOrElse( "POLICY_MAX_WORKERS", "3" ).asInstanceOf[String].toInt
 
   val system = ActorSystem("PolicyActorSystem")
   val factory = system.actorOf( FactoryActor.props( exchangeName, routeKey, hostName, port, minWorkers, maxWorkers ), "factory-actor" )

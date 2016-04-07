@@ -12,13 +12,13 @@ class InvokeActor( id : String, event : PolicyEvent, channel : Channel, envelope
   def receive = LoggingReceive { handleRequests }
 
   override def preStart(): Unit = {
-    Logger.debug( s"preStart( $id )" )
+    Logger.trace( s"preStart( $id )" )
   }
 
   val handleRequests : Receive = {
 
     case IncomingEvent( event, channel, envelope ) => {
-      Logger.debug( s"Consumer( $id ) - IncomingEvent : " + event.name  )
+      Logger.trace( s"Consumer( $id ) - IncomingEvent : " + event.name  )
 
       //TODO : do the damn thing instead of sleeping (simulating work)
       Thread.sleep( 4000 )

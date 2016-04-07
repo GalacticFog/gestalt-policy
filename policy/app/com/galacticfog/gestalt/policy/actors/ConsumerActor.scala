@@ -29,7 +29,7 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
       //TODO : this try may be unnecessary since we do the work in the actor no
       try {
         val message = new String(body, "UTF-8")
-        Logger.trace(" [x] Received '" + envelope.getRoutingKey() + "': tag :'" + envelope.getDeliveryTag + "':'" + message + "'")
+        Logger.trace(" [x] Received '" + envelope.getRoutingKey() + "': tag :'" + envelope.getDeliveryTag + "':'" + message + "' : size " + actorMap.size )
 
         //TODO : is this right?  We don't really care about the result, we just need to wait until we farm out the job
         val result = Await.result( self ? ConsumerEvent( message, channel, envelope ), Duration( 30, TimeUnit.SECONDS ) )
@@ -43,7 +43,7 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
     }
   }
 
-  val queue = channel.basicConsume( queueName, false, consumer )
+  val queue = channel.basicConsume( queueName, false, id, consumer )
   val actorMap = scala.collection.mutable.Map[ String, ActorRef ]()
 
   def numWorkers = actorMap.size
@@ -54,10 +54,14 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
     Logger.debug( s"preStart( $id )" )
   }
 
+  override def postStop(): Unit = {
+    Logger.debug( s"postStop( $id )" )
+  }
+
   val handleRequests : Receive = {
 
     case StopConsumerWorker( id ) => {
-      Logger.debug( "StopConsumerActor( " + id + " )" )
+      Logger.trace( "StopConsumerActor( " + id + " )" )
       val actor = actorMap.get( id ).get
       context.system.stop( actor )
       actorMap -= id
@@ -73,7 +77,7 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
         sender ! "done"
       }
       else {
-        Logger.debug( s"ActorMap Size( ${this.id} ) : " + actorMap.size )
+        Logger.trace( s"ActorMap Size( ${this.id} ) : " + actorMap.size )
         val event = Json.parse( msg ).validate[PolicyEvent] getOrElse {
           throw new Exception( "Failed to parse Policy event form event queue" )
         }
@@ -96,10 +100,23 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
       throw new Exception( info )
 
     }
+
+    case ShutdownConsumer => {
+      channel.basicCancel( id )
+      channel.close
+
+      //TODO : we should realy wait for any in progress workers to finish
+      if( actorMap.size != 0 )
+      {
+        throw new Exception( "This is where you should have waited for your workers" )
+      }
+
+      context.parent ! RemoveConsumer( id )
+    }
   }
 
   def newInvokeActor( n : String, id : String, event : PolicyEvent, channel : Channel, envelope : Envelope ) = {
-    Logger.debug( s"newInvokeActor(( $n )" )
+    Logger.trace( s"newInvokeActor(( $n )" )
     context.actorOf( InvokeActor.props( id, event, channel, envelope ), name = s"invoke-actor-$n" )
   }
 }
