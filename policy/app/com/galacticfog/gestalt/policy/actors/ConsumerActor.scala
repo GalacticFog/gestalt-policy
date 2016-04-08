@@ -4,6 +4,7 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import akka.util.Timeout
+import org.joda.time.DateTime
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import akka.actor.{Props, ActorLogging, ActorRef, Actor}
@@ -32,7 +33,13 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
         Logger.trace(" [x] Received '" + envelope.getRoutingKey() + "': tag :'" + envelope.getDeliveryTag + "':'" + message + "' : size " + actorMap.size )
 
         //TODO : is this right?  We don't really care about the result, we just need to wait until we farm out the job
+
+        //@debug the timing here
+        //val before = System.nanoTime
         val result = Await.result( self ? ConsumerEvent( message, channel, envelope ), Duration( 30, TimeUnit.SECONDS ) )
+        //val after = System.nanoTime
+        //val duration = (after - before).toDouble / 10e9
+        //Logger.debug( "Consume Time : " + duration + " s")
       }
       catch {
         case ex : Exception => {

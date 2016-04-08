@@ -21,12 +21,10 @@ public class TestServer {
 			Connection connection = factory.newConnection();
 			Channel channel = connection.createChannel();
 			channel.exchangeDeclare( EXCHANGE_NAME, "direct" );
-			//channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
-			//channel.queueBind( TASK_QUEUE_NAME, EXCHANGE_NAME, ROUTE_KEY );
 
-			//String message = getMessage(argv);
-			int MAX_MSGS = 20;
-			for( int i = 0; i < MAX_MSGS; ++i )
+			int numMessages = getNum(argv);
+
+			for( int i = 0; i < numMessages; ++i )
 			{
 				String message = "{ \"name\" : \"Event_" + i + "\", \"data\" : { \"test\" : \"data\" } }";
 
@@ -38,10 +36,10 @@ public class TestServer {
 			connection.close();
 		}      
 
-	private static String getMessage(String[] strings){
+	private static int getNum(String[] strings){
 		if (strings.length < 1)
-			return "Hello World!";
-		return joinStrings(strings, " ");
+			return 20;
+		return Integer.parseInt( strings[0] );
 	}
 
 	private static String joinStrings(String[] strings, String delimiter) {
