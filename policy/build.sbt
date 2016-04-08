@@ -14,4 +14,6 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "com.rabbitmq" % "amqp-client" % "3.6.1"
 
+libraryDependencies += "com.galacticfog" %% "gestalt-lambda-io" % "0.0.1-SNAPSHOT" withSources()
+
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"

@@ -31,6 +31,7 @@ class FactoryActor(
   val exchange    = channel.exchangeDeclare( exchangeName, "direct" )
   val queueName   = "worker-queue"
   val queue       = channel.queueDeclare( queueName, true, false, false, null )
+  val binder      = newBinderActor( UUID.randomUUID.toString )
 
   val MAX_CONSUMER_WORKERS = 12
 
@@ -66,7 +67,7 @@ class FactoryActor(
       if( actorMap.size < minWorkers ) {
         for ( i <- actorMap.size until minWorkers ) {
           val id = UUID.randomUUID.toString
-          val actor = newWorkerActor( id, id, connection.createChannel, queueName )
+          val actor = newConsumerActor( id, id, connection.createChannel, queueName, binder )
           actorMap += ( id -> (actor,0) )
         }
       }
@@ -93,7 +94,7 @@ class FactoryActor(
         else
         {
           val actorId = UUID.randomUUID.toString
-          val actor = newWorkerActor( actorId, actorId, connection.createChannel, queueName )
+          val actor = newConsumerActor( actorId, actorId, connection.createChannel, queueName, binder )
           actorMap += ( actorId -> (actor, 0))
         }
       }
@@ -130,9 +131,14 @@ class FactoryActor(
 
   }
 
-  def newWorkerActor( n : String, id : String, channel : Channel, queueName : String ) = {
+  def newConsumerActor( n : String, id : String, channel : Channel, queueName : String, binder : ActorRef ) = {
     Logger.debug( s"newConsumerActor(( $n )" )
-    context.actorOf( ConsumerActor.props( id, channel, queueName, MAX_CONSUMER_WORKERS ), name = s"consumer-actor-$n" )
+    context.actorOf( ConsumerActor.props( id, channel, queueName, MAX_CONSUMER_WORKERS, binder ), name = s"consumer-actor-$n" )
+  }
+
+  def newBinderActor( id : String ) = {
+    Logger.debug( s"newBinderActor(( $id )" )
+    context.actorOf( BindingActor.props( id ), name = s"binding-actor-$id" )
   }
 
 }

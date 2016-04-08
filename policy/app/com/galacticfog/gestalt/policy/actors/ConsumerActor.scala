@@ -16,11 +16,11 @@ import com.galacticfog.gestalt.policy.actors.PolicyMessages._
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.Logger
 import com.rabbitmq.client._
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 import scala.concurrent.duration.Duration
 
-class ConsumerActor( id : String, channel : Channel, queueName : String, maxWorkers : Int ) extends Actor with ActorLogging {
+class ConsumerActor( id : String, channel : Channel, queueName : String, maxWorkers : Int, binder : ActorRef ) extends Actor with ActorLogging {
 
   implicit val timeout = Timeout(100.days)
 
@@ -85,12 +85,18 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
       }
       else {
         Logger.trace( s"ActorMap Size( ${this.id} ) : " + actorMap.size )
-        val event = Json.parse( msg ).validate[PolicyEvent] getOrElse {
-          throw new Exception( "Failed to parse Policy event form event queue" )
+        Logger.debug( "incoming event : " + msg )
+        val event = Json.parse( msg ).validate[PolicyEvent] match {
+          case JsSuccess(s,_) => s
+          case err@JsError(_) => {
+            //TODO : is this right?  Clear out the bad messages
+            channel.basicAck( envelope.getDeliveryTag, false )
+            throw new Exception( "Error parsing policy event : " + Json.toJson( JsError.toFlatJson(err) ) )
+          }
         }
 
         val actorId = UUID.randomUUID.toString
-        val actor = newInvokeActor( actorId, actorId, event, channel, envelope )
+        val actor = newInvokeActor( actorId, actorId, event, channel, envelope, binder )
         actorMap += ( actorId -> actor )
         context.parent ! UpdateConsumerWorkers( id, actorMap.size )
         actor ! IncomingEvent( event, channel, envelope )
@@ -122,12 +128,12 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
     }
   }
 
-  def newInvokeActor( n : String, id : String, event : PolicyEvent, channel : Channel, envelope : Envelope ) = {
+  def newInvokeActor( n : String, id : String, event : PolicyEvent, channel : Channel, envelope : Envelope, binder : ActorRef ) = {
     Logger.trace( s"newInvokeActor(( $n )" )
-    context.actorOf( InvokeActor.props( id, event, channel, envelope ), name = s"invoke-actor-$n" )
+    context.actorOf( InvokeActor.props( id, event, channel, envelope, binder ), name = s"invoke-actor-$n" )
   }
 }
 
 object ConsumerActor {
-  def props( id : String, channel : Channel, queueName : String, maxWorkers : Int ) : Props = Props( new ConsumerActor( id, channel, queueName, maxWorkers ) )
+  def props( id : String, channel : Channel, queueName : String, maxWorkers : Int, binder : ActorRef ) : Props = Props( new ConsumerActor( id, channel, queueName, maxWorkers, binder ) )
 }

@@ -1,0 +1,14 @@
+{
+	"eventContext": {
+		"eventName": "Container.Migrate",
+			"meta": "http://meta.galacticfog.com:80",
+			"workspace": "5d164bfe-fb3c-11e5-86aa-5e5517507c66",
+			"environment": "e8babf3a-fb3e-11e5-86aa-5e5517507c66",
+			"org": "f46c974a-fb3e-11e5-86aa-5e5517507c66",
+			"resourceId": "0190f524-fb3f-11e5-86aa-5e5517507c66",
+			"resourceType": "Gestalt::Resource::Container"
+	},
+	"lambdaArgs": {
+		"resource" : {}
+	}
+}

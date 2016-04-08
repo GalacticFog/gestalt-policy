@@ -23,10 +23,10 @@ public class TestServer {
 			channel.exchangeDeclare( EXCHANGE_NAME, "direct" );
 
 			int numMessages = getNum(argv);
+			String message = getPayload( argv );
 
 			for( int i = 0; i < numMessages; ++i )
 			{
-				String message = "{ \"name\" : \"Event_" + i + "\", \"data\" : { \"test\" : \"data\" } }";
 
 				channel.basicPublish( EXCHANGE_NAME, ROUTE_KEY, null, message.getBytes());
 				System.out.println(" [x] Sent '" + message + "'");
@@ -40,6 +40,15 @@ public class TestServer {
 		if (strings.length < 1)
 			return 20;
 		return Integer.parseInt( strings[0] );
+	}
+
+	private static String getPayload( String[] strings ) {
+		if( strings.length < 1 )
+		{
+			String message = "{ \"name\" : \"Event\", \"data\" : { \"test\" : \"data\" } }";
+			return message;
+		}
+		return strings[1];
 	}
 
 	private static String joinStrings(String[] strings, String delimiter) {
