@@ -1,6 +1,10 @@
-export RABBIT_HOST="rabbit.dev.galacticfog.com"
+export RABBIT_HOST=rabbit.dev.galacticfog.com
 export RABBIT_PORT=5672
 export RABBIT_EXCHANGE="test-exchange"
 export RABBIT_ROUTE="policy"
 export POLICY_MIN_WORKERS=5
 export POLICY_MAX_WORKERS=20
+export LAMBDA_HOST=lambda.dev.galacticfog.com
+export LAMBDA_PORT=80
+export LAMBDA_USER=root
+export LAMBDA_PASSWORD=letmein

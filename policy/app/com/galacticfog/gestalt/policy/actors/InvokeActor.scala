@@ -2,7 +2,10 @@ package com.galacticfog.gestalt.policy.actors
 
 import akka.actor.{ActorRef, Props, ActorLogging, Actor}
 import akka.event.LoggingReceive
+import com.galacticfog.gestalt.lambda.io.domain.LambdaEvent
+import com.galacticfog.gestalt.lambda.io.domain.LambdaEvent._
 import com.galacticfog.gestalt.policy.{WebClient, PolicyEvent}
+import com.galacticfog.gestalt.policy.PolicyEvent._
 import com.galacticfog.gestalt.policy.actors.PolicyMessages._
 import com.rabbitmq.client.{Channel, Envelope}
 import play.api.Logger
@@ -29,7 +32,6 @@ class InvokeActor( id : String, event : PolicyEvent, channel : Channel, envelope
     case IncomingEvent( event, channel, envelope ) => {
       Logger.trace( s"Consumer( $id ) - IncomingEvent : " + event.eventContext.eventName )
 
-      //TODO : we probably need the context as well
       binder ! LookupLambda( event )
     }
 
@@ -38,15 +40,13 @@ class InvokeActor( id : String, event : PolicyEvent, channel : Channel, envelope
 
       lambdaIds.foreach { lambdaId =>
         try {
-          //TODO : get the actual ID form the binder
           val url = "/lambdas/" + lambdaId + "/invoke"
-          //TODO : get the actual payload out of the event
-          val payload = Json.parse( "{ \"thing\" : \"otherThing\" }" )
-          val result = wsClient.easyPost( url, payload )
+          val payload = new LambdaEvent( event.eventContext.eventName, Json.toJson( event.lambdaArgs ) )
+          val result = wsClient.easyPost( url, Json.toJson( payload ) )
         }
         catch {
           case ex : Exception => {
-            //TODO : do anything else?  We don't want to stop processing any subequent lambdas
+            //TODO : do anything else?  We don't want to stop processing any subsequent lambdas
             ex.printStackTrace
           }
         }

@@ -30,13 +30,20 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
 
       //TODO : lookup the lambda in the map once it's populated
 
+      val workKey = event.eventContext.org + "." + event.eventContext.workspace
+      val envKey = event.eventContext.org + "." + event.eventContext.environment
 
-      //if we find the lambda
-      sender ! FoundLambda( event, Seq("lambdaId") )
+      val workLambda = workspaceMap.get( workKey )
+      val envLambda = environmentMap.get( envKey )
 
-      //if we didn't find the lambda
-      //sender ! LambdaNotFound( eventId )
+      val lambdaEvent = (workLambda,envLambda) match {
+        case (Some(s), Some(t)) => FoundLambda( event, Seq(s, t) )
+        case (Some(s), None) => FoundLambda( event, Seq(s) )
+        case (None, Some(s)) => FoundLambda( event, Seq(s) )
+        case (None, None) => LambdaNotFound( event )
+      }
 
+      sender ! lambdaEvent
     }
 
     case RepopulateMap => {
