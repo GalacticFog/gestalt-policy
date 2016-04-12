@@ -16,8 +16,8 @@ public class TestServer {
 		throws java.lang.Exception {
 
 			ConnectionFactory factory = new ConnectionFactory();
-			factory.setHost("192.168.200.20");
-			factory.setPort(10000);
+			factory.setHost("rabbit.dev.galacticfog.com");
+			factory.setPort(5672);
 			Connection connection = factory.newConnection();
 			Channel channel = connection.createChannel();
 			channel.exchangeDeclare( EXCHANGE_NAME, "direct" );

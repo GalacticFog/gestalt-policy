@@ -1,31 +1,31 @@
 {
-	"id" : "rabbit",
-  "cpus": 0.2,
-  "mem": 512,
-  "container": {
-    "type": "DOCKER",
-    "docker": {
-      "image": "rabbitmq:3",
-      "network": "BRIDGE",
-      "portMappings": [
-        {
-          "containerPort": 5672,
-          "hostPort": 0,
-          "protocol": "tcp"
-        }
-      ],
-      "forcePullImage": true
-    },
-    "volumes": [],
-    "args": [
-      "-d --hostname my-rabbit",
-      "--name some-rabbit"
-    ]
-  },
-  "env": {},
-  "labels": {},
-  "ports": [
-    5672
-  ],
-  "healthChecks": []
+	"id" : "dev/rabbit",
+		"cpus": 0.2,
+		"mem": 512,
+		"container": {
+			"type": "DOCKER",
+			"docker": {
+				"image": "rabbitmq:3-management",
+				"network": "BRIDGE",
+				"portMappings": [
+				{ "containerPort": 5672, "hostPort": 0, "protocol": "tcp" },
+				{ "containerPort": 15672, "hostPort": 0, "protocol": "tcp" }
+				],
+					"forcePullImage": true
+			},
+			"volumes": [],
+			"args": [
+				"-d --hostname my-rabbit",
+			"--name some-rabbit"
+				]
+		},
+		"env": {},
+		"labels": {
+			"HAPROXY_0_PORT": "5672",
+			"HAPROXY_0_MODE": "tcp",
+			"HAPROXY_1_VHOST": "rabbit.dev.galacticfog.com",
+			"HAPROXY_1_PORT": "15672"
+		},
+		"ports": [ 0, 0 ],
+		"healthChecks": []
 }

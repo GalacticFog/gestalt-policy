@@ -7,6 +7,8 @@ import akka.actor
 import akka.pattern.ask
 import akka.actor.{Props, ActorLogging, ActorRef, Actor}
 import akka.event.LoggingReceive
+import com.galacticfog.gestalt.meta.api.sdk.HostConfig
+import com.galacticfog.gestalt.policy.RabbitConfig
 import com.galacticfog.gestalt.policy.actors.PolicyMessages._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -16,10 +18,8 @@ import play.api.Logger
 
 class FactoryActor(
 
-  exchangeName : String,
-  routeKey : String,
-  hostName : String,
-  port : Int,
+  rabbitConfig : RabbitConfig,
+  metaConfig : HostConfig,
   minWorkers : Int,
   maxWorkers : Int
 
@@ -28,20 +28,20 @@ class FactoryActor(
   val actorMap    = scala.collection.mutable.Map[String, (ActorRef, Int)]()
   val connection  = getConnection()
   val channel     = connection.createChannel
-  val exchange    = channel.exchangeDeclare( exchangeName, "direct" )
+  val exchange    = channel.exchangeDeclare( rabbitConfig.exchangeName, "direct" )
   val queueName   = "worker-queue"
   val queue       = channel.queueDeclare( queueName, true, false, false, null )
-  val binder      = newBinderActor( UUID.randomUUID.toString )
+  val binder      = newBinderActor( UUID.randomUUID.toString, metaConfig )
 
   val MAX_CONSUMER_WORKERS = 12
 
   //bind our queue to the exchage
-  channel.queueBind( queueName, exchangeName, routeKey )
+  channel.queueBind( queueName, rabbitConfig.exchangeName, rabbitConfig.routeKey )
 
   def getConnection() : Connection = {
     val factory = new ConnectionFactory()
-    factory.setHost( hostName )
-    factory.setPort( port )
+    factory.setHost( rabbitConfig.hostName )
+    factory.setPort( rabbitConfig.port )
     factory.setRequestedHeartbeat(300)
     factory.newConnection()
   }
@@ -58,9 +58,9 @@ class FactoryActor(
 
     case CheckWorkers => {
 
-      Logger.debug( "Checking workers : " )
+      Logger.trace( "Checking workers : " )
       actorMap.foreach { entry =>
-        Logger.debug( "actor : " + entry._1 + " -> " + entry._2._2 )
+        Logger.trace( "actor : " + entry._1 + " -> " + entry._2._2 )
       }
 
       //scale up to the minimum number of workers
@@ -81,8 +81,8 @@ class FactoryActor(
         x + y._2._2
       }
       val pctFull = totalWorkers.toDouble / (actorMap.size * MAX_CONSUMER_WORKERS).toDouble
-      Logger.debug( s"Actors(${actorMap.size}) - Workers($totalWorkers) - Pct($pctFull)")
-      Logger.debug( s"Messages(${queue.getMessageCount}) - Consumers(${queue.getConsumerCount})" )
+      Logger.trace( s"Actors(${actorMap.size}) - Workers($totalWorkers) - Pct($pctFull)")
+      Logger.trace( s"Messages(${queue.getMessageCount}) - Consumers(${queue.getConsumerCount})" )
 
       if( pctFull > .50 )
       {
@@ -113,7 +113,7 @@ class FactoryActor(
     }
 
     case RemoveConsumer( id ) => {
-      Logger.debug( s"RemoveConsumer( $id )" )
+      Logger.trace( s"RemoveConsumer( $id )" )
       val entry = actorMap(id)
       context.system.stop( entry._1 )
       actorMap -= id
@@ -132,30 +132,26 @@ class FactoryActor(
   }
 
   def newConsumerActor( n : String, id : String, channel : Channel, queueName : String, binder : ActorRef ) = {
-    Logger.debug( s"newConsumerActor(( $n )" )
+    Logger.trace( s"newConsumerActor(( $n )" )
     context.actorOf( ConsumerActor.props( id, channel, queueName, MAX_CONSUMER_WORKERS, binder ), name = s"consumer-actor-$n" )
   }
 
-  def newBinderActor( id : String ) = {
+  def newBinderActor( id : String, metaConfig : HostConfig ) = {
     Logger.debug( s"newBinderActor(( $id )" )
-    context.actorOf( BindingActor.props( id ), name = s"binding-actor-$id" )
+    context.actorOf( BindingActor.props( id, metaConfig ), name = s"binding-actor-$id" )
   }
 
 }
 
 object FactoryActor {
   def props(
-    exchangeName : String,
-    routeKey : String,
-    hostName : String,
-    port : Int,
+    rabbitConfig : RabbitConfig,
+    metaConfig : HostConfig,
     minWorkers : Int,
     maxWorkers : Int
   ) : Props = Props( new FactoryActor(
-      exchangeName,
-      routeKey,
-      hostName,
-      port,
+      rabbitConfig,
+      metaConfig,
       minWorkers,
       maxWorkers
     )

@@ -19,7 +19,7 @@ object PolicyMessages {
   case class ConsumerError( msg : String ) extends PolicyMessage
 
   case class LookupLambda( event : PolicyEvent ) extends PolicyMessage
-  case class FoundLambda( event : PolicyEvent, lambdaId : String ) extends PolicyMessage
+  case class FoundLambda( event : PolicyEvent, lambdaId : Seq[String] ) extends PolicyMessage
   case class LambdaNotFound( event : PolicyEvent ) extends PolicyMessage
   case object RepopulateMap extends PolicyMessage
 }

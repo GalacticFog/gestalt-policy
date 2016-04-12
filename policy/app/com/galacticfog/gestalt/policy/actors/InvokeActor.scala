@@ -33,15 +33,26 @@ class InvokeActor( id : String, event : PolicyEvent, channel : Channel, envelope
       binder ! LookupLambda( event )
     }
 
-    case FoundLambda( event, lambdaId ) => {
+    case FoundLambda( event, lambdaIds ) => {
 
-      //TODO : get the actual ID form the binder
-      val url = "/lambdas/" + lambdaId + "/invoke"
-      //TODO : get the actual payload out of the event
-      val payload = Json.parse( "{ \"thing\" : \"otherThing\" }" )
-      val result = wsClient.easyPost( url, payload )
 
-      //context.parent ! StopConsumerWorker( id )
+      lambdaIds.foreach { lambdaId =>
+        try {
+          //TODO : get the actual ID form the binder
+          val url = "/lambdas/" + lambdaId + "/invoke"
+          //TODO : get the actual payload out of the event
+          val payload = Json.parse( "{ \"thing\" : \"otherThing\" }" )
+          val result = wsClient.easyPost( url, payload )
+        }
+        catch {
+          case ex : Exception => {
+            //TODO : do anything else?  We don't want to stop processing any subequent lambdas
+            ex.printStackTrace
+          }
+        }
+      }
+
+      context.parent ! StopConsumerWorker( id )
     }
 
     case LambdaNotFound( event ) => {
