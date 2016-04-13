@@ -30,8 +30,8 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
 
       //TODO : lookup the lambda in the map once it's populated
 
-      val workKey = event.eventContext.org + "." + event.eventContext.workspace
-      val envKey = event.eventContext.org + "." + event.eventContext.environment
+      val workKey = event.eventContext.org + "." + event.eventContext.workspace + "." + event.eventContext.eventName
+      val envKey = event.eventContext.org + "." + event.eventContext.environment + "." + event.eventContext.eventName
 
       val workLambda = workspaceMap.get( workKey )
       val envLambda = environmentMap.get( envKey )
@@ -114,8 +114,11 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
       val envExtractor( envId ) = rule.defined_at.href.get.toString
       //Logger.debug( "ENV : " + envId )
 
-      val key = orgId + "." + envId
-      environmentMap += ( key -> rule.lambda.id )
+      val keyBase = orgId + "." + envId
+      rule.actions.foreach{ action =>
+        val key = keyBase + "." + action
+        environmentMap += ( key -> rule.lambda.id )
+      }
     }
     else if( rule.defined_at.href.get.toString.contains( "workspaces" ) )
     {
@@ -125,8 +128,11 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
       val workExtractor( workId ) = rule.defined_at.href.get.toString
       //Logger.debug( "WORK : " + workId )
 
-      val key = orgId + "." + workId
-      workspaceMap += ( key -> rule.lambda.id )
+      val keyBase = orgId + "." + workId
+      rule.actions.foreach{ action =>
+        val key = keyBase + "." + action
+        workspaceMap += ( key -> rule.lambda.id )
+      }
     }
     else
     {
