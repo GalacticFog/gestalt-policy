@@ -124,8 +124,20 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
 
     case ShutdownConsumer => {
 
-      channel.basicCancel( id )
-      channel.close
+      //the channel may already be closed because of a connection failure
+      try {
+        channel.basicCancel( id )
+        channel.close
+      }
+      catch {
+        case ex : com.rabbitmq.client.AlreadyClosedException => {
+          log.error( "Connection already closed : " + ex.getMessage )
+        }
+        case ex : Exception => {
+          ex.printStackTrace
+          throw new Exception( "Some other connection issue : " + ex.getMessage )
+        }
+      }
 
       //TODO : we should realy wait for any in progress workers to finish
       if( actorMap.size != 0 )
