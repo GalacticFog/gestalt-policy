@@ -12,6 +12,17 @@ libraryDependencies ++= Seq(
   ws
 )
 
+dockerBaseImage := "java:latest"
+
+maintainer in Docker := "Brad Futch <brad@galacticfog.com>"
+
+dockerUpdateLatest := true
+
+dockerExposedPorts in Docker := Seq(9000)
+
+dockerRepository := Some("galacticfog.artifactoryonline.com")
+
+
 libraryDependencies += "com.rabbitmq" % "amqp-client" % "3.6.1"
 
 libraryDependencies += "com.galacticfog" %% "gestalt-lambda-io" % "0.0.1-SNAPSHOT" withSources()
