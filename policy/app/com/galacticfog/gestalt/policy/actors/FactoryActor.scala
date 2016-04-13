@@ -26,17 +26,20 @@ class FactoryActor(
 ) extends Actor with ActorLogging {
 
   val actorMap    = scala.collection.mutable.Map[String, (ActorRef, Int)]()
-  val connection  = getConnection()
-  val channel     = connection.createChannel
+  val binder      = newBinderActor( UUID.randomUUID.toString, metaConfig )
+  var connection  = getConnection()
+  var channel     = connection.createChannel
   val exchange    = channel.exchangeDeclare( rabbitConfig.exchangeName, "direct" )
   val queueName   = "worker-queue"
   val queue       = channel.queueDeclare( queueName, true, false, false, null )
-  val binder      = newBinderActor( UUID.randomUUID.toString, metaConfig )
 
-  val MAX_CONSUMER_WORKERS = 12
-
-  //bind our queue to the exchage
   channel.queueBind( queueName, rabbitConfig.exchangeName, rabbitConfig.routeKey )
+
+
+  val MAX_CONSUMER_WORKERS = sys.env.getOrElse( "MAX_CONSUMER_WORKERS", "12" ).toInt
+  val TICK_TIME = sys.env.getOrElse( "WORKER_TICK_TIME_SECONDS", "3" ).toInt.seconds
+  val CONNECTION_CHECK_TIME = sys.env.getOrElse( "CONNECTION_CHECK_TIME_SECONDS", "30" ).toInt.seconds
+
 
   def getConnection() : Connection = {
     val factory = new ConnectionFactory()
@@ -48,9 +51,9 @@ class FactoryActor(
 
   def receive = LoggingReceive { handleRequests }
 
-  private val TICK_TIME = 3 seconds
 
   override def preStart() = {
+    context.system.scheduler.scheduleOnce( 1 second, self, CheckConnection )
     context.system.scheduler.scheduleOnce( 1 second, self, CheckWorkers )
   }
 
@@ -61,9 +64,18 @@ class FactoryActor(
 
       if( !connection.isOpen )
       {
-        //we have to kill the connection and then restart all the consumers
 
+        Logger.debug( "CONNECTION DIED - RESTARTING" )
+        //we have to kill the connection and then restart all the consumers
+        connection = getConnection()
+
+        //now restart all of the workers
+        actorMap.foreach{ entry =>
+          entry._2._1 ! ShutdownConsumer
+        }
       }
+
+      context.system.scheduler.scheduleOnce( CONNECTION_CHECK_TIME, self, CheckConnection )
     }
 
     case CheckWorkers => {
