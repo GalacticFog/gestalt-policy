@@ -68,30 +68,38 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
   val handleRequests : Receive = {
 
     case StopConsumerWorker( id ) => {
+
       Logger.trace( "StopConsumerActor( " + id + " )" )
+
       val actor = actorMap.get( id ).get
       context.system.stop( actor )
       actorMap -= id
       context.parent ! UpdateConsumerWorkers( this.id, actorMap.size )
+
     }
 
     case ConsumerEvent( msg, channel, envelope ) => {
 
-
       if( actorMap.size == maxWorkers ) {
+
         Logger.trace( "Reject Message - too many workers" )
         channel.basicNack( envelope.getDeliveryTag, false, true )
         sender ! "done"
+
       }
       else {
+
         Logger.trace( s"ActorMap Size( ${this.id} ) : " + actorMap.size )
         Logger.debug( "incoming event : " + msg )
+
         val event = Json.parse( msg ).validate[PolicyEvent] match {
           case JsSuccess(s,_) => s
           case err@JsError(_) => {
+
             //TODO : is this right?  Clear out the bad messages
             channel.basicAck( envelope.getDeliveryTag, false )
             throw new Exception( "Error parsing policy event : " + Json.toJson( JsError.toFlatJson(err) ) )
+
           }
         }
 
@@ -115,6 +123,7 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
     }
 
     case ShutdownConsumer => {
+
       channel.basicCancel( id )
       channel.close
 

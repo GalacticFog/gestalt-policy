@@ -56,6 +56,16 @@ class FactoryActor(
 
   val handleRequests : Receive = {
 
+    case CheckConnection => {
+      Logger.trace( "Checking Connection" )
+
+      if( !connection.isOpen )
+      {
+        //we have to kill the connection and then restart all the consumers
+
+      }
+    }
+
     case CheckWorkers => {
 
       Logger.trace( "Checking workers : " )

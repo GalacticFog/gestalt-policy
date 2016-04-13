@@ -16,7 +16,7 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
 
   val environmentMap = collection.mutable.Map[ String, String ]()
   val workspaceMap = collection.mutable.Map[ String, String ]()
-  val CHECK_DURATION = 1 minute
+  val CHECK_DURATION = sys.env.getOrElse( "BINDING_UPDATE_SECONDS", "60" ).toInt.seconds
 
   override def preStart(): Unit = {
     Logger.debug( s"preStart( $id )" )
