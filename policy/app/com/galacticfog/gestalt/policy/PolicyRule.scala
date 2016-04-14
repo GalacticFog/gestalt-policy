@@ -9,29 +9,35 @@ import scala.reflect.ClassTag
 case class PolicyRule(
   actions : Seq[String],
   defined_at : ResourceLink,
-  eval_logic : String,
-  filter : String,
+  eval_logic : Option[String],
+  filter : Option[String],
   lambda : ResourceLink,
   parent : ResourceLink
 )
 
 object PolicyRule {
 
-  def getProp[A]( key : String, props : Map[String, JsValue] )(implicit reads: Reads[A], classTag: ClassTag[A]) : A = {
+  def getProp[A]( key : String, props : Map[String, JsValue] )(implicit reads: Reads[A], classTag: ClassTag[A]) : Option[A] = {
 
-    val prop = props.get( key ).get
-    parseAs[A]( prop, "Could not find property named : " + key )
+    props.get( key ) match {
+      case Some( s ) => {
+        Some( parseAs[A]( s, "Could not find property named : " + key ) )
+      }
+      case None => {
+        None
+      }
+    }
   }
 
   def make( instance : ResourceInstance ) : PolicyRule = {
     val props = instance.properties.get
     new PolicyRule(
-      actions     = getProp[Seq[String]]( "actions", props ),
-      defined_at  = getProp[ResourceLink]( "defined_at", props ),
+      actions     = getProp[Seq[String]]( "actions", props ).get,
+      defined_at  = getProp[ResourceLink]( "defined_at", props ).get,
       eval_logic  = getProp[String]( "eval_logic", props ),
       filter      = getProp[String]( "filter", props ),
-      lambda      = getProp[ResourceLink]( "lambda", props ),
-      parent      = getProp[ResourceLink]( "parent", props )
+      lambda      = getProp[ResourceLink]( "lambda", props ).get,
+      parent      = getProp[ResourceLink]( "parent", props ).get
     )
   }
 
