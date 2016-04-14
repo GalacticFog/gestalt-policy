@@ -27,7 +27,9 @@
 			"LAMBDA_HOST" : "lambda.dev.galacticfog.com",
 			"LAMBDA_PORT" : "80",
 			"LAMBDA_USER" : "root",
-			"LAMBDA_PASSWORD" : "letmein"
+			"LAMBDA_PASSWORD" : "letmein",
+			"CONNECTION_CHECK_TIME_SECONDS" : "60",
+			"HEARTBEAT_SECONDS" : "60"
 		},
 		"instances": 1,
 		"cpus": 0.2,

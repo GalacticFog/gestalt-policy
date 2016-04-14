@@ -12,7 +12,7 @@ import com.galacticfog.gestalt.policy.RabbitConfig
 import com.galacticfog.gestalt.policy.actors.PolicyMessages._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
-import com.rabbitmq.client.{Channel, ConnectionFactory, Connection}
+import com.rabbitmq.client._
 import scala.concurrent.duration._
 import play.api.Logger
 
@@ -38,22 +38,46 @@ class FactoryActor(
 
   val MAX_CONSUMER_WORKERS = sys.env.getOrElse( "MAX_CONSUMER_WORKERS", "12" ).toInt
   val TICK_TIME = sys.env.getOrElse( "WORKER_TICK_TIME_SECONDS", "3" ).toInt.seconds
-  val CONNECTION_CHECK_TIME = sys.env.getOrElse( "CONNECTION_CHECK_TIME_SECONDS", "30" ).toInt.seconds
+  val CONNECTION_CHECK_TIME = sys.env.getOrElse( "CONNECTION_CHECK_TIME_SECONDS", "60" ).toInt.seconds
+  val HEARTBEAT_SECONDS = sys.env.getOrElse( "HEARTBEAT_SECONDS", "10" ).toInt
 
 
   def getConnection() : Connection = {
     val factory = new ConnectionFactory()
     factory.setHost( rabbitConfig.hostName )
     factory.setPort( rabbitConfig.port )
-    factory.setRequestedHeartbeat(300)
-    factory.newConnection()
+    //0 is infinite
+    factory.setConnectionTimeout(0)
+    factory.setAutomaticRecoveryEnabled( true )
+    //factory.setRequestedHeartbeat( HEARTBEAT_SECONDS )
+
+    val con = factory.newConnection()
+    con.addShutdownListener(
+      new ShutdownListener()
+      {
+        override def shutdownCompleted(cause : ShutdownSignalException) : Unit =
+        {
+          Logger.warn( "CONNECTION SHUTDOWN : " )
+          Logger.warn( " - reason : " + cause.getReason )
+          Logger.warn( " - is hard : " + cause.isHardError )
+          Logger.warn( " - is caused by app : " + cause.isInitiatedByApplication )
+          Logger.warn( " - message : " + cause.getMessage )
+          Logger.warn (" - stack trace : " + cause.getStackTraceString )
+
+          self ! CheckConnection
+        }
+      }
+    )
+    con
   }
 
   def receive = LoggingReceive { handleRequests }
 
 
   override def preStart() = {
-    context.system.scheduler.scheduleOnce( 1 second, self, CheckConnection )
+
+
+    //context.system.scheduler.scheduleOnce( 1 second, self, CheckConnection )
     context.system.scheduler.scheduleOnce( 1 second, self, CheckWorkers )
   }
 
@@ -75,7 +99,7 @@ class FactoryActor(
         }
       }
 
-      context.system.scheduler.scheduleOnce( CONNECTION_CHECK_TIME, self, CheckConnection )
+      //context.system.scheduler.scheduleOnce( CONNECTION_CHECK_TIME, self, CheckConnection )
     }
 
     case CheckWorkers => {
