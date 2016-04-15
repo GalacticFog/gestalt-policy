@@ -39,7 +39,6 @@ class FactoryActor(
   val MAX_CONSUMER_WORKERS = sys.env.getOrElse( "MAX_CONSUMER_WORKERS", "12" ).toInt
   val TICK_TIME = sys.env.getOrElse( "WORKER_TICK_TIME_SECONDS", "3" ).toInt.seconds
   val CONNECTION_CHECK_TIME = sys.env.getOrElse( "CONNECTION_CHECK_TIME_SECONDS", "60" ).toInt.seconds
-  val HEARTBEAT_SECONDS = sys.env.getOrElse( "HEARTBEAT_SECONDS", "10" ).toInt
 
 
   def getConnection() : Connection = {
@@ -49,7 +48,7 @@ class FactoryActor(
     //0 is infinite
     factory.setConnectionTimeout(0)
     factory.setAutomaticRecoveryEnabled( true )
-    //factory.setRequestedHeartbeat( HEARTBEAT_SECONDS )
+    factory.setRequestedHeartbeat( 10 )
 
     val con = factory.newConnection()
     con.addShutdownListener(
