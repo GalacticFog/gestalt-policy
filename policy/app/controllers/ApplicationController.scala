@@ -12,4 +12,8 @@ object ApplicationController extends Controller {
     Ok( service.test )
   }
 
+  def health = Action {
+    Ok( "healthy" )
+  }
+
 }

@@ -1,6 +1,6 @@
 {
 	"eventContext": {
-		"eventName": "Container.Migrate",
+		"eventName": "container.migrate",
 			"meta": "http://meta.dev2.galacticfog.com:80",
 			"workspace": "5d164bfe-fb3c-11e5-86aa-5e5517507c66",
 			"environment": "9cd62639-6453-4f2f-a433-10cf752881c3",

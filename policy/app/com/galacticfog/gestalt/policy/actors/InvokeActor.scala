@@ -41,7 +41,7 @@ class InvokeActor( id : String, event : PolicyEvent, channel : Channel, envelope
       lambdaIds.foreach { lambdaId =>
         try {
           val url = "/lambdas/" + lambdaId + "/invoke"
-          val payload = new LambdaEvent( event.eventContext.eventName, Json.toJson( event.lambdaArgs ) )
+          val payload = new LambdaEvent( event.eventContext.eventName, Json.toJson( event ) )
           val result = wsClient.easyPost( url, Json.toJson( payload ) )
         }
         catch {
@@ -56,7 +56,7 @@ class InvokeActor( id : String, event : PolicyEvent, channel : Channel, envelope
     }
 
     case LambdaNotFound( event ) => {
-      ???
+      throw new Exception( s"Lambda not found for meta context : org (${event.eventContext.org}) - workspace (${event.eventContext.workspace}) - env (${event.eventContext.environment}) ")
     }
   }
 }
