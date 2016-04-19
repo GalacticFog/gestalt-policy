@@ -17,6 +17,7 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
   val environmentMap = collection.mutable.Map[ String, String ]()
   val workspaceMap = collection.mutable.Map[ String, String ]()
   val CHECK_DURATION = sys.env.getOrElse( "BINDING_UPDATE_SECONDS", "120" ).toInt.seconds
+  val meta = new Meta( metaConfig )
 
   override def preStart(): Unit = {
     Logger.debug( s"preStart( $id )" )
@@ -49,10 +50,10 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
     case RepopulateMap => {
       Logger.debug( s"RepopulateMap")
 
-      val meta = new Meta( metaConfig )
-
-      //TODO : this is temporary, there will be no dupes in the futue
+      //TODO : this is still leaking memory pretty good ~500K every execution
+      printMemStats
       val list = meta.topLevelRules.get
+      printMemStats
 
       /*
       Logger.debug( "FOUND rules : " )
@@ -62,6 +63,7 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
       */
 
       //val rules = list.filter{ x => list.count( _.id == x.id ) == 1 }.map( PolicyRule.make(_) )
+      //TODO : this is temporary, there will be no dupes in the futue
       val filtered = dedupe( list.toList )
 
       /*
@@ -91,6 +93,15 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
 
       context.system.scheduler.scheduleOnce( CHECK_DURATION, self, RepopulateMap )
     }
+  }
+
+  def printMemStats(): Unit = {
+    val mb = (1024*1024).toDouble
+    val runtime = Runtime.getRuntime
+    Logger.debug("** Used Memory:  " + (runtime.totalMemory - runtime.freeMemory) / mb)
+    //Logger.debug("** Free Memory:  " + runtime.freeMemory / mb)
+    //Logger.debug("** Total Memory: " + runtime.totalMemory / mb)
+    //Logger.debug("** Max Memory:   " + runtime.maxMemory / mb)
   }
 
   def dedupe( elements : List[ResourceInstance] ) : List[ResourceInstance] = {

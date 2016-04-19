@@ -1,6 +1,6 @@
 {
 	"id" : "dev/gestalt-policy",
-	"args": [],
+	"args": ["-J-Xmx1024m"],
 		"env": {
 			"GESTALT_VERSION": "1.0",
 			"GESTALT_SECURITY_APPID": "bd96d05a-7065-4fa2-bea2-98beebe8ebe4",
