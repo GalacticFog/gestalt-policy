@@ -1,6 +1,6 @@
 {
 	"id" : "gestalt-policy",
-	"args": [],
+	"args": ["-J-Xmx1024m"],
 		"env": {
 			"GESTALT_VERSION": "1.0",
 			"GESTALT_SECURITY_APPID": "bd96d05a-7065-4fa2-bea2-98beebe8ebe4",
@@ -32,7 +32,7 @@
 			"META_USER" : "root",
 			"META_PASSWORD" : "letmein",
 			"CONNECTION_CHECK_TIME_SECONDS" : "60",
-			"BINDING_UPDATE_SECONDS" : "20"
+			"BINDING_UPDATE_SECONDS" : "30"
 		},
 		"instances": 1,
 		"cpus": 0.2,
@@ -43,7 +43,7 @@
 			"type": "DOCKER",
 			"volumes": [],
 				"docker": {
-					"image": "galacticfog.artifactoryonline.com/gestalt-policy:0.0.1-SNAPSHOT-00e3215e",
+					"image": "galacticfog.artifactoryonline.com/gestalt-policy:0.0.1-SNAPSHOT-a8d7a46f",
 					"network": "BRIDGE",
 					"portMappings": [
 					{

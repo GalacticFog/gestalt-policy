@@ -14,8 +14,9 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
 
   def receive = LoggingReceive { handleRequests }
 
-  val environmentMap = collection.mutable.Map[ String, String ]()
-  val workspaceMap = collection.mutable.Map[ String, String ]()
+  var environmentMap = collection.mutable.Map[ String, String ]()
+  var workspaceMap = collection.mutable.Map[ String, String ]()
+
   val CHECK_DURATION = sys.env.getOrElse( "BINDING_UPDATE_SECONDS", "120" ).toInt.seconds
   val meta = new Meta( metaConfig )
 
@@ -55,30 +56,36 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
       val list = meta.topLevelRules.get
       printMemStats
 
-      /*
-      Logger.debug( "FOUND rules : " )
-      list.foreach{ rule =>
-        Logger.debug( "found : " + rule.id )
-      }
-      */
-
       //val rules = list.filter{ x => list.count( _.id == x.id ) == 1 }.map( PolicyRule.make(_) )
       //TODO : this is temporary, there will be no dupes in the futue
       val filtered = dedupe( list.toList )
 
-      /*
-      Logger.debug( "AFTER filter : " )
-      filtered.foreach{ rule =>
-        Logger.debug( "filtered : " + rule.id )
-      }
-      */
+
+      //NOTE : this is all an attempt to do a LEFT OUTER JOIN with the maps I fetch, but couldn't find a good
+      //       way with the scala collection sets
 
       val rules = filtered.map( PolicyRule.make(_) )
 
-      rules.foreach{ rule =>
-        Logger.trace( "Processing Rule : " + rule.defined_at )
-        processRule( rule )
+      val ( envMap, workMap ) = processRules( rules )
+
+      val envMapCommon = envMap.keySet.intersect( environmentMap.keySet ).map{ key =>
+        ( key -> envMap.get( key ).get )
       }
+
+      val envMapNew = envMap.keySet.diff( environmentMap.keySet ).map{ key =>
+        ( key -> envMap.get( key ).get )
+      }
+
+      val workMapCommon = workMap.keySet.intersect( workspaceMap.keySet ).map{ key =>
+        ( key -> envMap.get( key ).get )
+      }
+
+      val workMapNew = workMap.keySet.diff( workspaceMap.keySet ).map{ key =>
+        ( key -> envMap.get( key ).get )
+      }
+
+      environmentMap = scala.collection.mutable.Map() ++ envMapCommon ++ envMapNew
+      workspaceMap = scala.collection.mutable.Map() ++ workMapCommon ++ workMapNew
 
       Logger.debug( "Env Map (" )
       environmentMap.foreach{ entry =>
@@ -111,7 +118,20 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
       elements.head :: dedupe(for (x <- elements.tail if x.id != elements.head.id) yield x)
   }
 
-  def processRule( rule : PolicyRule ) = {
+  def processRules( rules : Seq[PolicyRule] ) = {
+
+    val envMap = scala.collection.mutable.Map[ String, String ]()
+    val workMap = scala.collection.mutable.Map[ String, String ]()
+
+    rules.foreach{ rule =>
+              Logger.trace( "Processing Rule : " + rule.defined_at )
+              processRule( rule, envMap, workMap )
+            }
+
+    (envMap, workMap)
+  }
+
+  def processRule( rule : PolicyRule, envMap : scala.collection.mutable.Map[String,String], workMap : scala.collection.mutable.Map[String,String] ) = {
 
     val orgExtractor = """.*/(?:orgs)/(.*?)(?:/|$).*""".r
     val orgExtractor( orgId ) = rule.defined_at.href.get
@@ -128,7 +148,8 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
       val keyBase = orgId + "." + envId
       rule.actions.foreach{ action =>
         val key = keyBase + "." + action
-        environmentMap += ( key -> rule.lambda.id )
+        //environmentMap += ( key -> rule.lambda.id )
+        envMap( key ) = rule.lambda.id
       }
     }
     else if( rule.defined_at.href.get.toString.contains( "workspaces" ) )
@@ -142,7 +163,7 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
       val keyBase = orgId + "." + workId
       rule.actions.foreach{ action =>
         val key = keyBase + "." + action
-        workspaceMap += ( key -> rule.lambda.id )
+        workMap( key ) = rule.lambda.id
       }
     }
     else
