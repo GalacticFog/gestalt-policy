@@ -99,6 +99,9 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
       Logger.debug( ")")
 
       context.system.scheduler.scheduleOnce( CHECK_DURATION, self, RepopulateMap )
+
+      //TODO : this shouldn't be necessary, let's see if it helps
+      System.gc
     }
   }
 

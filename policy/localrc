@@ -13,3 +13,4 @@ export META_PORT=14374
 export META_USER=root
 export META_PASSWORD=letmein
 export BINDING_UPDATE_SECONDS=10
+export SBT_OPTS="-verbose:gc"
