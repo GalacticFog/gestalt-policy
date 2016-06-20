@@ -2,6 +2,7 @@ package com.galacticfog.gestalt.policy
 
 import com.galacticfog.gestalt.meta.api.sdk.{ResourceInstance, ResourceLink}
 import com.galacticfog.gestalt.utils.json.JsonUtils._
+import play.api.Logger
 import play.api.libs.json.{Reads, JsValue}
 
 import scala.reflect.ClassTag
@@ -31,6 +32,7 @@ object PolicyRule {
   }
 
   def make( instance : ResourceInstance ) : PolicyRule = {
+    Logger.debug( "MAKING RULE : " + instance.toString )
     val props = instance.properties.get
     val orgId = instance.org.id
     new PolicyRule(
@@ -40,7 +42,7 @@ object PolicyRule {
       filter      = getProp[String]( "filter", props ),
       lambda      = getProp[ResourceLink]( "lambda", props ).get,
       parent      = getProp[ResourceLink]( "parent", props ).get,
-      orgId = orgId
+      orgId       = orgId
     )
   }
 

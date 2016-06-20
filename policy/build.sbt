@@ -25,7 +25,7 @@ dockerRepository := Some("galacticfog.artifactoryonline.com")
 
 libraryDependencies += "com.rabbitmq" % "amqp-client" % "3.6.1"
 
-libraryDependencies += "com.galacticfog" %% "gestalt-lambda-io" % "0.0.1-SNAPSHOT" withSources()
+libraryDependencies += "com.galacticfog" %% "gestalt-lambda-io" % "0.3.0-SNAPSHOT" withSources()
 
 libraryDependencies += "com.galacticfog" %% "gestalt-meta-sdk-scala" % "0.1.2-SNAPSHOT" withSources()
 
