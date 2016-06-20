@@ -32,7 +32,6 @@ object PolicyRule {
   }
 
   def make( instance : ResourceInstance ) : PolicyRule = {
-    Logger.debug( "MAKING RULE : " + instance.toString )
     val props = instance.properties.get
     val orgId = instance.org.id
     new PolicyRule(

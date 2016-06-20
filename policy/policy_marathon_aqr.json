@@ -27,7 +27,7 @@
 		"container": {
 			"type": "DOCKER",
 			"docker": {
-				"image": "galacticfog.artifactoryonline.com/gestalt-policy:0.0.1-SNAPSHOT-7cf07d3f",
+				"image": "galacticfog.artifactoryonline.com/gestalt-policy:0.0.1-SNAPSHOT-d1b988d1",
 				"network": "BRIDGE",
 				"portMappings": [ 
 				{ "containerPort": 9000, "protocol": "tcp" } 
