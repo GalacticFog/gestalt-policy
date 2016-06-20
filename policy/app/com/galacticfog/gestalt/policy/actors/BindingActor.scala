@@ -136,10 +136,6 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
 
   def processRule( rule : PolicyRule, envMap : scala.collection.mutable.Map[String,String], workMap : scala.collection.mutable.Map[String,String] ) = {
 
-    val orgExtractor = """.*/(?:orgs)/(.*?)(?:/|$).*""".r
-    val orgExtractor( orgId ) = rule.defined_at.href.get
-    //Logger.debug( "ORG : " + orgId )
-
     if( rule.defined_at.href.get.toString.contains( "environments" ) )
     {
       //this assumes the href is constructed like so /orgs/{id}/environments/{id}
@@ -148,7 +144,7 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
       val envExtractor( envId ) = rule.defined_at.href.get.toString
       //Logger.debug( "ENV : " + envId )
 
-      val keyBase = orgId + "." + envId
+      val keyBase = rule.orgId + "." + envId
       rule.actions.foreach{ action =>
         val key = keyBase + "." + action
         //environmentMap += ( key -> rule.lambda.id )
@@ -163,7 +159,7 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
       val workExtractor( workId ) = rule.defined_at.href.get.toString
       //Logger.debug( "WORK : " + workId )
 
-      val keyBase = orgId + "." + workId
+      val keyBase = rule.orgId + "." + workId
       rule.actions.foreach{ action =>
         val key = keyBase + "." + action
         workMap( key ) = rule.lambda.id

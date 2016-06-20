@@ -12,7 +12,8 @@ case class PolicyRule(
   eval_logic : Option[String],
   filter : Option[String],
   lambda : ResourceLink,
-  parent : ResourceLink
+  parent : ResourceLink,
+  orgId : String
 )
 
 object PolicyRule {
@@ -31,13 +32,15 @@ object PolicyRule {
 
   def make( instance : ResourceInstance ) : PolicyRule = {
     val props = instance.properties.get
+    val orgId = instance.org.id
     new PolicyRule(
       actions     = getProp[Seq[String]]( "actions", props ).get,
       defined_at  = getProp[ResourceLink]( "defined_at", props ).get,
       eval_logic  = getProp[String]( "eval_logic", props ),
       filter      = getProp[String]( "filter", props ),
       lambda      = getProp[ResourceLink]( "lambda", props ).get,
-      parent      = getProp[ResourceLink]( "parent", props ).get
+      parent      = getProp[ResourceLink]( "parent", props ).get,
+      orgId = orgId
     )
   }
 
