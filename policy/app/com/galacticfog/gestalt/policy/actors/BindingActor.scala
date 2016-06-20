@@ -9,6 +9,7 @@ import com.rabbitmq.client.{Channel, Envelope}
 import play.api.Logger
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
 
 class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with ActorLogging {
 
@@ -53,7 +54,13 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
 
       //TODO : this is still leaking memory pretty good ~500K every execution
       printMemStats
-      val list = meta.topLevelRules.get
+      val list = meta.topLevelRules match {
+        case Success(s) => s
+        case Failure(ex) => {
+          ex.printStackTrace
+          throw new Exception( ex.getMessage )
+        }
+      }
       printMemStats
 
       //val rules = list.filter{ x => list.count( _.id == x.id ) == 1 }.map( PolicyRule.make(_) )
