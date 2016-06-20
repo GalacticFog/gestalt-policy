@@ -77,11 +77,11 @@ class BindingActor( id : String, metaConfig : HostConfig ) extends Actor with Ac
       }
 
       val workMapCommon = workMap.keySet.intersect( workspaceMap.keySet ).map{ key =>
-        ( key -> envMap.get( key ).get )
+        ( key -> workMap.get( key ).get )
       }
 
       val workMapNew = workMap.keySet.diff( workspaceMap.keySet ).map{ key =>
-        ( key -> envMap.get( key ).get )
+        ( key -> workMap.get( key ).get )
       }
 
       environmentMap = scala.collection.mutable.Map() ++ envMapCommon ++ envMapNew
