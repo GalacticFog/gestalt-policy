@@ -27,6 +27,7 @@ object PolicyFramework {
   val minWorkers    = sys.env.getOrElse( "POLICY_MIN_WORKERS", "1" ).toInt
   val maxWorkers    = sys.env.getOrElse( "POLICY_MAX_WORKERS", "3" ).toInt
   val metaHost      = sys.env.getOrElse( "META_HOST", "meta.dev2.galacticfog.com" )
+  val metaProtocol  = sys.env.getOrElse( "META_PROTOCOL", "http" )
   val metaPort      = sys.env.getOrElse( "META_PORT", "14374" ).toInt
   val metaUser      = sys.env.getOrElse( "META_USER", "root" )
   val metaPassword  = sys.env.getOrElse( "META_PASSWORD", "letmein" )
@@ -35,7 +36,7 @@ object PolicyFramework {
 
   val system = ActorSystem("PolicyActorSystem")
   val rabbitConfig = new RabbitConfig( exchangeName, routeKey, hostName, port )
-  val metaConfig = new HostConfig( "http", metaHost, None, 10, Some( new BasicCredential( metaUser, metaPassword ) ) )
+  val metaConfig = new HostConfig( metaProtocol, metaHost, None, 10, Some( new BasicCredential( metaUser, metaPassword ) ) )
   val factory = system.actorOf( FactoryActor.props( rabbitConfig, metaConfig, minWorkers, maxWorkers ), "factory-actor" )
 
   val unhandledActor = system.actorOf( UnhandledMessageActor.props(), "unhandled-message-actor" )
