@@ -27,8 +27,8 @@
   <logger name="play" level="INFO" />
   <logger name="application" level="DEBUG" />
   <logger name="akka.actor" level="DEBUG" />
-	<logger name="com.ning.http.client" level="TRACE"/>
-	<logger name="com.galacticfog.gestalt.meta.api.sdk" level="TRACE"/>
+	<logger name="com.ning.http.client" level="WARN"/>
+	<logger name="com.galacticfog.gestalt.meta.api.sdk" level="DEBUG"/>
 
 
   <!-- Off these ones as they are annoying, and anyway we manage configuration ourselves -->
