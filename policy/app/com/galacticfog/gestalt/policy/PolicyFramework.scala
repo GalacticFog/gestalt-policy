@@ -36,7 +36,7 @@ object PolicyFramework {
 
   val system = ActorSystem("PolicyActorSystem")
   val rabbitConfig = new RabbitConfig( exchangeName, routeKey, hostName, port )
-  val metaConfig = new HostConfig( metaProtocol, metaHost, None, 10, Some( new BasicCredential( metaUser, metaPassword ) ) )
+  val metaConfig = new HostConfig( metaProtocol, metaHost, Some(metaPort), 10, Some( new BasicCredential( metaUser, metaPassword ) ) )
   val factory = system.actorOf( FactoryActor.props( rabbitConfig, metaConfig, minWorkers, maxWorkers ), "factory-actor" )
 
   val unhandledActor = system.actorOf( UnhandledMessageActor.props(), "unhandled-message-actor" )
