@@ -42,6 +42,13 @@ class FactoryActor(
 
 
   def getConnection() : Connection = {
+
+    Logger.debug( "Rabbit Connection : \n" +
+      "\t host     : " + rabbitConfig.hostName + "\n" +
+      "\t port     : " + rabbitConfig.port + "\n" +
+      "\t exchange : " + rabbitConfig.exchangeName + "\n" +
+      "\t route    : " + rabbitConfig.routeKey + "\n" )
+
     val factory = new ConnectionFactory()
     factory.setHost( rabbitConfig.hostName )
     factory.setPort( rabbitConfig.port )
