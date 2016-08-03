@@ -1,8 +1,9 @@
+import com.typesafe.sbt.packager.docker._
 name := """gestalt-policy"""
 
 version := "0.0.2-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+lazy val root = (project in file(".")).enablePlugins(PlayScala,SbtNativePackager)
 
 scalaVersion := "2.11.7"
 
@@ -35,6 +36,6 @@ resolvers ++= Seq(
 		"scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
 		"snapshots" at "http://scala-tools.org/repo-snapshots",
 		"releases"  at "http://scala-tools.org/repo-releases",
-		"gestalt" at "http://galacticfog.artifactoryonline.com/galacticfog/libs-snapshots-local",
-		"gestalt-releases" at "http://galacticfog.artifactoryonline.com/galacticfog/libs-releases-local"
+        "gestalt-snapshots" at "https://galacticfog.artifactoryonline.com/galacticfog/libs-snapshots-local",
+        "gestalt-releases" at "https://galacticfog.artifactoryonline.com/galacticfog/libs-releases-local"
 		)
