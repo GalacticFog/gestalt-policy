@@ -59,8 +59,6 @@ github-publish:
 deploy-to-test:
   stage: deploy
   environment: test
-  tags: 
-    - test-cluster
   script: 
     - echo checking for access to marathon
     - curl http://marathon.mesos:8080/v2/apps/test-tasks/policy || true
