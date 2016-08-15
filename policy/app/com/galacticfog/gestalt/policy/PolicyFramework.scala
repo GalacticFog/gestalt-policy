@@ -26,8 +26,8 @@ object PolicyFramework {
   val routeKey      = sys.env.getOrElse( "RABBIT_ROUTE", "policy" )
   val minWorkers    = sys.env.getOrElse( "POLICY_MIN_WORKERS", "1" ).toInt
   val maxWorkers    = sys.env.getOrElse( "POLICY_MAX_WORKERS", "3" ).toInt
-  val metaHost      = sys.env.getOrElse( "META_HOST", "meta.dev2.galacticfog.com" )
   val metaProtocol  = sys.env.getOrElse( "META_PROTOCOL", "http" )
+  val metaHost      = sys.env.getOrElse( "META_HOST", "meta.dev2.galacticfog.com" )
   val metaPort      = sys.env.getOrElse( "META_PORT", "14374" ).toInt
   val metaUser      = sys.env.getOrElse( "META_USER", "root" )
   val metaPassword  = sys.env.getOrElse( "META_PASSWORD", "letmein" )
