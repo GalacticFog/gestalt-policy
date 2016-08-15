@@ -23,8 +23,8 @@
 		"labels": {
 			"HAPROXY_0_PORT": "5672",
 			"HAPROXY_0_MODE": "tcp",
-			"HAPROXY_1_VHOST": "rabbit.dev.galacticfog.com",
-			"HAPROXY_1_PORT": "15672"
+			"HAPROXY_1_PORT": "15672",
+			"HAPROXY_1_MODE": "tcp"
 		},
 		"ports": [ 0, 0 ],
 		"healthChecks": []
