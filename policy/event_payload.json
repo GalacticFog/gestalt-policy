@@ -1,0 +1,115 @@
+{
+  "id": "d213dc3d-2caf-4be1-b5b3-6f3b2c22e588",
+  "identity": "b02a439f-bac9-4445-8a5f-9e1db752d739",
+  "timestamp": 1473858934338,
+  "resource": "http://dummy.href",
+  "event": "lambda.create.post",
+  "action": "lambda.create",
+  "args": {
+    "rule": {
+      "id": "65947f52-14cc-40af-b01e-3d16301b9071",
+      "name": "all-crud-and-scale",
+      "resource_type": "Gestalt::Resource::Rule::Event",
+      "resource_state": "Gestalt::Resource::State::Active",
+      "org": {
+        "typeId": "23ba3299-b04e-4c5c-9b3d-64939b22944e",
+        "id": "1f8dca03-7294-4ecb-b6c8-6e91a9680a44",
+        "href": "/test-galacticfog-com"
+      },
+      "owner": {
+        "typeId": "58b6775d-37a5-44bc-9115-7331fc4964b7",
+        "id": "b02a439f-bac9-4445-8a5f-9e1db752d739",
+        "name": "gftest",
+        "href": "/root/users/b02a439f-bac9-4445-8a5f-9e1db752d739"
+      },
+      "description": "",
+      "created": {
+        "typeId": "58b6775d-37a5-44bc-9115-7331fc4964b7",
+        "id": "b02a439f-bac9-4445-8a5f-9e1db752d739",
+        "timestamp": "2016-09-14T13:15:09.551Z"
+      },
+      "modified": {
+        "action": "created",
+        "typeId": "58b6775d-37a5-44bc-9115-7331fc4964b7",
+        "id": "b02a439f-bac9-4445-8a5f-9e1db752d739",
+        "timestamp": "2016-09-14T13:15:09.551Z"
+      },
+      "properties": {
+        "parent": {
+          "typeId": "c3c05a39-acb3-4a45-97a8-5696ad1b4214",
+          "id": "21a191d1-2064-4590-bf8f-32675a82ec55",
+          "name": "crud",
+          "href": "/test-galacticfog-com/resources/21a191d1-2064-4590-bf8f-32675a82ec55"
+        },
+        "defined_at": {
+          "typeId": "46b28076-9d94-4860-9aca-e8483a56d32c",
+          "id": "e8034beb-0be6-45e5-a861-15d265372407",
+          "name": "policy-testing",
+          "href": "http://10.10.10.10:14374/test-galacticfog-com/environments/e8034beb-0be6-45e5-a861-15d265372407"
+        },
+        "lambda": {
+          "typeId": "e3a463fc-e51f-4166-8cec-3d9a54f7babd",
+          "id": "85129f77-a139-4a8a-bbc6-0f1ce9868ac0",
+          "name": "hello-policy",
+          "href": "/test-galacticfog-com/lambdas/85129f77-a139-4a8a-bbc6-0f1ce9868ac0"
+        },
+        "actions": [
+          "container.create.post",
+          "container.delete.post",
+          "lambda.create.post",
+          "lambda.delete.post",
+          "container.scale.post"
+        ]
+      },
+      "tags": []
+    },
+    "payload": {
+      "id": "ddedb58e-521d-4942-9325-d8f7c73a81da",
+      "name": "test-lambda",
+      "resource_type": "Gestalt::Resource::Node::Lambda",
+      "resource_state": "Gestalt::Resource::State::Active",
+      "org": {
+        "typeId": "23ba3299-b04e-4c5c-9b3d-64939b22944e",
+        "id": "1f8dca03-7294-4ecb-b6c8-6e91a9680a44",
+        "href": "/test-galacticfog-com"
+      },
+      "owner": {
+        "typeId": "58b6775d-37a5-44bc-9115-7331fc4964b7",
+        "id": "b02a439f-bac9-4445-8a5f-9e1db752d739",
+        "name": "gftest",
+        "href": "/root/users/b02a439f-bac9-4445-8a5f-9e1db752d739"
+      },
+      "description": "",
+      "created": null,
+      "modified": null,
+      "properties": {
+        "function_mappings": {
+          "test.me": ""
+        },
+        "providers": [
+          {
+            "id": "b20bd871-3803-4578-937d-5077712984a1",
+            "locations": [
+              {
+                "name": "dcos-test-cluster",
+                "enabled": true,
+                "selected": true
+              }
+            ]
+          }
+        ],
+        "public": true,
+        "code": "dW5kZWZpbmVk",
+        "cpus": 1,
+        "code_type": "code",
+        "synchronous": true,
+        "timeout": 30,
+        "runtime": "nodejs",
+        "env": {},
+        "memory": 1024
+      },
+      "variables": {},
+      "tags": []
+    }
+  }
+}
