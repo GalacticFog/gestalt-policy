@@ -20,7 +20,7 @@ import play.api.libs.json.{JsError, JsSuccess, Json}
 
 import scala.concurrent.duration.Duration
 
-class ConsumerActor( id : String, channel : Channel, queueName : String, maxWorkers : Int, binder : ActorRef ) extends Actor with ActorLogging {
+class ConsumerActor( id : String, channel : Channel, queueName : String, maxWorkers : Int ) extends Actor with ActorLogging {
 
   implicit val timeout = Timeout(100.days)
 
@@ -104,7 +104,7 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
         }
 
         val actorId = UUID.randomUUID.toString
-        val actor = newInvokeActor( actorId, actorId, event, channel, envelope, binder )
+        val actor = newInvokeActor( actorId, actorId, event, channel, envelope )
         actorMap += ( actorId -> actor )
         context.parent ! UpdateConsumerWorkers( id, actorMap.size )
         actor ! IncomingEvent( event, channel, envelope )
@@ -149,12 +149,12 @@ class ConsumerActor( id : String, channel : Channel, queueName : String, maxWork
     }
   }
 
-  def newInvokeActor( n : String, id : String, event : PolicyEvent, channel : Channel, envelope : Envelope, binder : ActorRef ) = {
+  def newInvokeActor( n : String, id : String, event : PolicyEvent, channel : Channel, envelope : Envelope ) = {
     Logger.trace( s"newInvokeActor(( $n )" )
-    context.actorOf( InvokeActor.props( id, event, channel, envelope, binder ), name = s"invoke-actor-$n" )
+    context.actorOf( InvokeActor.props( id, event, channel, envelope ), name = s"invoke-actor-$n" )
   }
 }
 
 object ConsumerActor {
-  def props( id : String, channel : Channel, queueName : String, maxWorkers : Int, binder : ActorRef ) : Props = Props( new ConsumerActor( id, channel, queueName, maxWorkers, binder ) )
+  def props( id : String, channel : Channel, queueName : String, maxWorkers : Int ) : Props = Props( new ConsumerActor( id, channel, queueName, maxWorkers ) )
 }

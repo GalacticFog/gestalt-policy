@@ -26,7 +26,6 @@ class FactoryActor(
 ) extends Actor with ActorLogging {
 
   val actorMap    = scala.collection.mutable.Map[String, (ActorRef, Int)]()
-  val binder      = newBinderActor( UUID.randomUUID.toString, metaConfig )
   var connection  = getConnection()
   var channel     = connection.createChannel
   val exchange    = channel.exchangeDeclare( rabbitConfig.exchangeName, "direct" )
@@ -119,7 +118,7 @@ class FactoryActor(
       if( actorMap.size < minWorkers ) {
         for ( i <- actorMap.size until minWorkers ) {
           val id = UUID.randomUUID.toString
-          val actor = newConsumerActor( id, id, connection.createChannel, queueName, binder )
+          val actor = newConsumerActor( id, id, connection.createChannel, queueName )
           actorMap += ( id -> (actor,0) )
         }
       }
@@ -146,7 +145,7 @@ class FactoryActor(
         else
         {
           val actorId = UUID.randomUUID.toString
-          val actor = newConsumerActor( actorId, actorId, connection.createChannel, queueName, binder )
+          val actor = newConsumerActor( actorId, actorId, connection.createChannel, queueName )
           actorMap += ( actorId -> (actor, 0))
         }
       }
@@ -183,16 +182,10 @@ class FactoryActor(
 
   }
 
-  def newConsumerActor( n : String, id : String, channel : Channel, queueName : String, binder : ActorRef ) = {
+  def newConsumerActor( n : String, id : String, channel : Channel, queueName : String ) = {
     Logger.trace( s"newConsumerActor(( $n )" )
-    context.actorOf( ConsumerActor.props( id, channel, queueName, MAX_CONSUMER_WORKERS, binder ), name = s"consumer-actor-$n" )
+    context.actorOf( ConsumerActor.props( id, channel, queueName, MAX_CONSUMER_WORKERS ), name = s"consumer-actor-$n" )
   }
-
-  def newBinderActor( id : String, metaConfig : HostConfig ) = {
-    Logger.debug( s"newBinderActor(( $id )" )
-    context.actorOf( BindingActor.props( id, metaConfig ), name = s"binding-actor-$id" )
-  }
-
 }
 
 object FactoryActor {

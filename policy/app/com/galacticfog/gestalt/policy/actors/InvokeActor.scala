@@ -4,6 +4,7 @@ import akka.actor.{ActorRef, Props, ActorLogging, Actor}
 import akka.event.LoggingReceive
 import com.galacticfog.gestalt.lambda.io.domain.LambdaEvent
 import com.galacticfog.gestalt.lambda.io.domain.LambdaEvent._
+import com.galacticfog.gestalt.meta.api.sdk.ResourceLink
 import com.galacticfog.gestalt.policy.{WebClient, PolicyEvent}
 import com.galacticfog.gestalt.policy.PolicyEvent._
 import com.galacticfog.gestalt.policy.actors.PolicyMessages._
@@ -11,7 +12,7 @@ import com.rabbitmq.client.{Channel, Envelope}
 import play.api.Logger
 import play.api.libs.json.Json
 
-class InvokeActor( id : String, event : PolicyEvent, channel : Channel, envelope : Envelope, binder : ActorRef ) extends Actor with ActorLogging {
+class InvokeActor( id : String, event : PolicyEvent, channel : Channel, envelope : Envelope ) extends Actor with ActorLogging {
 
   def receive = LoggingReceive { handleRequests }
 
@@ -30,39 +31,43 @@ class InvokeActor( id : String, event : PolicyEvent, channel : Channel, envelope
   val handleRequests : Receive = {
 
     case IncomingEvent( event, channel, envelope ) => {
-      Logger.trace( s"Consumer( $id ) - IncomingEvent : " + event.eventContext.eventName )
+      Logger.trace( s"Consumer( $id ) - IncomingEvent : " + event.event )
 
-      binder ! LookupLambda( event )
-    }
+      try {
 
-    case FoundLambda( event, lambdaIds ) => {
+        val lambdaId = event.args.rule.properties.get.get( "lambda" ) match {
+          case Some(l) => {
 
+            val link = l.validate[ResourceLink].getOrElse{
+              throw new Exception( "Lambda resource is no longer a ResourceLink, something has changed in the rendering" )
+            }
 
-      lambdaIds.foreach { lambdaId =>
-        try {
-          val url = "/lambdas/" + lambdaId + "/invoke"
-          val payload = new LambdaEvent( event.eventContext.eventName, Json.toJson( event ) )
-          val result = wsClient.easyPost( url, Json.toJson( payload ) )
-        }
-        catch {
-          case ex : Exception => {
-            //TODO : do anything else?  We don't want to stop processing any subsequent lambdas
-            ex.printStackTrace
+            link.id
           }
+          case None => {
+            throw new Exception( "Missing 'lambda' field from properties on rule." )
+          }
+        }
+
+        val url = "/lambdas/" + lambdaId + "/invoke"
+        val payload = new LambdaEvent( event.event, Json.toJson( event.args.payload ) )
+        val result = wsClient.easyPost( url, Json.toJson( payload ) )
+
+      }
+      catch {
+        case ex: Exception => {
+          //TODO : do anything else?  We don't want to stop processing any subsequent lambdas
+          ex.printStackTrace
         }
       }
 
       context.parent ! StopConsumerWorker( id )
     }
-
-    case LambdaNotFound( event ) => {
-      throw new Exception( s"Lambda not found for meta context : org (${event.eventContext.org}) - workspace (${event.eventContext.workspace}) - env (${event.eventContext.environment}) ")
-    }
   }
 }
 
 object InvokeActor {
-  def props( id : String, event : PolicyEvent, channel : Channel, envelope : Envelope, binder : ActorRef ) : Props = Props(
-    new InvokeActor( id, event, channel, envelope, binder )
+  def props( id : String, event : PolicyEvent, channel : Channel, envelope : Envelope ) : Props = Props(
+    new InvokeActor( id, event, channel, envelope )
   )
 }

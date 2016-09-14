@@ -1,15 +1,13 @@
 package com.galacticfog.gestalt.policy
 
-import play.api.libs.json.{Json, JsValue}
+import com.galacticfog.gestalt.meta.api.sdk.ResourceInstance
+import play.api.libs.json.Json
 
-case class EventContext( eventName : String, meta : String, workspace : String, environment : String, org : String, resourceId : String, resourceType : String )
+case class PolicyArgs( rule : ResourceInstance, payload : ResourceInstance )
 
-//case class LambdaArgs( resource : JsValue )
-
-case class PolicyEvent( eventContext : EventContext, lambdaArgs : JsValue )
+case class PolicyEvent( id : String, identity : String, timestamp : Long, event : String, action : String, args : PolicyArgs )
 
 object PolicyEvent {
-  implicit val eventContextFormat = Json.format[EventContext]
-  //implicit val lambdaArgsFormat = Json.format[LambdaArgs]
+  implicit val policyArgsFormat = Json.format[PolicyArgs]
   implicit val policyEventFormat = Json.format[PolicyEvent]
 }
