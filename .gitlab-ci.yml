@@ -1,3 +1,5 @@
+image: galacticfog/docker-sbt:1.12
+
 stages:
 - test
 - publish
@@ -15,21 +17,24 @@ test:
   script:
     - cd policy
     - sbt clean update test docker:stage
-    - cd target/docker/stage
-    - echo building $DOCKER_IMG:$CI_PIPELINE_ID
-    - docker build -t $DOCKER_IMG:$CI_PIPELINE_ID .
+  artifacts:
+    expire_in: 30 minutes
+    paths:
+    - policy/target/docker/stage/
 
 docker-publish:
   stage: publish
+  services:
+    - docker:dind
   script: 
     - cd policy
     - VERSION=$(grep "^version" build.sbt | sed 's/.*:=[ ]*//' | sed 's/"//g')
     - DOCKER_TAG=${CI_BUILD_TAG-$VERSION-${CI_BUILD_REF:0:8}}
-    - echo publishing $DOCKER_IMG:$DOCKER_TAG
-    - docker tag -f $DOCKER_IMG:$CI_PIPELINE_ID $DOCKER_IMG:$DOCKER_TAG
-    - docker push   $DOCKER_IMG:$DOCKER_TAG
-    - docker rmi    $DOCKER_IMG:$DOCKER_TAG
-    - docker rmi    $DOCKER_IMG:$CI_PIPELINE_ID
+    - cd target/docker/stage
+    - echo building $DOCKER_IMG:$DOCKER_TAG
+    - docker build -t $DOCKER_IMG:$DOCKER_TAG .
+    - docker push     $DOCKER_IMG:$DOCKER_TAG
+    - docker rmi      $DOCKER_IMG:$DOCKER_TAG
 
 github-publish:
   stage: publish
@@ -58,7 +63,7 @@ github-publish:
     - cd policy
     - VERSION=$(grep "^version" build.sbt | sed 's/.*:=[ ]*//' | sed 's/"//g')
     - DOCKER_TAG=${CI_BUILD_TAG-$VERSION-${CI_BUILD_REF:0:8}}
-    - /usr/local/bin/update-deployed-app.sh  marathon.mesos:8080 test-gestalt-tasks/policy  $DOCKER_IMG:$DOCKER_TAG
+    - /usr/local/bin/update-deployed-app.sh  marathon.mesos:8080 gestalt-test-tasks/policy  $DOCKER_IMG:$DOCKER_TAG
   allow_failure: true
   artifacts:
 
