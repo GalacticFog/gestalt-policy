@@ -20,10 +20,10 @@ class InvokeActor( id : String, event : PolicyEvent, channel : Channel, envelope
     Logger.trace( s"preStart( $id )" )
   }
 
-  val lambdaHost = sys.env.getOrElse( "LAMBDA_HOST", "localhost" )
-  val lambdaPort = sys.env.getOrElse( "LAMBDA_PORT", "9001" ).toInt
-  val lambdaUser = sys.env.getOrElse( "LAMBDA_USER", "root" )
-  val lambdaPassword = sys.env.getOrElse( "LAMBDA_PASSWORD", "letmein" )
+  val lambdaHost = sys.env.getOrElse( "LASER_SERVICE_HOST", "localhost" )
+  val lambdaPort = sys.env.getOrElse( "LASER_SERVICE_PORT", "9001" ).toInt
+  val lambdaUser = sys.env.getOrElse( "LASER_USER", "root" )
+  val lambdaPassword = sys.env.getOrElse( "LASER_PASSWORD", "letmein" )
   val builder = new com.ning.http.client.AsyncHttpClientConfig.Builder()
   val client = new play.api.libs.ws.ning.NingWSClient(builder.build())
   val wsClient = WebClient( client, "http", lambdaHost, lambdaPort, lambdaUser, lambdaPassword )

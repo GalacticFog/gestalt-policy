@@ -20,8 +20,8 @@ case class RabbitConfig( exchangeName : String, routeKey : String, hostName : St
 object PolicyFramework {
 
   //TODO : remove defaults for local config and throw errors
-  val hostName      = sys.env.getOrElse( "RABBIT_HOST", "192.168.200.20" )
-  val port          = sys.env.getOrElse( "RABBIT_PORT", "10000" ).toInt
+  val hostName      = sys.env.getOrElse( "RABBIT_SERVICE_HOST", "192.168.200.20" )
+  val port          = sys.env.getOrElse( "RABBIT_SERVICE_PORT", "10000" ).toInt
   val exchangeName  = sys.env.getOrElse( "RABBIT_EXCHANGE", "test-exchange" )
   val routeKey      = sys.env.getOrElse( "RABBIT_ROUTE", "policy" )
   val minWorkers    = sys.env.getOrElse( "POLICY_MIN_WORKERS", "1" ).toInt
