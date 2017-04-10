@@ -1,0 +1,99 @@
+{
+  "name": "brad-lambda-provider",
+  "description": "lambda provider",
+  "resource_type": "Gestalt::Configuration::Provider::Lambda",
+  "properties": {
+    "config": {
+      "env": {
+        "public": {},
+        "private": {
+          "LAMBDA_DATABASE_NAME": "brad-lambda-provider",
+          "RABBIT_MONITOR_TOPIC": "monitor",
+          "RABBIT_RESPONSE_TOPIC": "response",
+          "RABBIT_LISTEN_ROUTE": "lambda-input",
+          "RABBIT_MONITOR_EXCHANGE": "lambda-monitor-exchange",
+          "RABBIT_RESPONSE_EXCHANGE": "response",
+          "RABBIT_EXCHANGE": "lambda-executor-exchange",
+          "META_PROTOCOL": "http",
+          "META_PORT": "14374",
+          "META_HOSTNAME": "10.10.10.10",
+          "META_PASSWORD": "KmXLL4eVH+m5DFlqYJK+UOXv6aKwXxRENkjyb8t2",
+          "META_USER": "196509e7-e6e9-497f-805e-eba1128e1be1",
+          "META_COMPUTE_PASSWORD": "KmXLL4eVH+m5DFlqYJK+UOXv6aKwXxRENkjyb8t2",
+          "META_COMPUTE_USERNAME": "196509e7-e6e9-497f-805e-eba1128e1be1",
+          "META_COMPUTE_HOST": "http://10.10.10.10:14374",
+          "META_COMPUTE_FQON": "/brad-org/environments/c598681e-7693-46ad-ab9b-f87ad4d77d25/containers",
+          "META_COMPUTE_PROVIDER_ID": "548b3343-f6e0-40a2-aabb-339067095b35",
+          "GESTALT_SCHEDULER": "true",
+          "MIN_PORT_RANGE": "60000",
+          "MAX_PORT_RANGE": "60500",
+          "MANAGEMENT_PROTOCOL": "ws",
+          "MIN_COOL_EXECUTORS": "1",
+          "SCALE_DOWN_TIME_SECONDS": "15"
+        }
+      }
+    },
+    "linked_providers": [
+      {
+        "name": "LAMBDA_DATABASE",
+        "id": "795e46ce-7074-45c2-8106-055c9aee39fc",
+        "location": "dcos"
+      },
+      {
+        "name": "GESTALT_SECURITY",
+        "id": "8a2fc681-5278-4151-b42d-dbf9540602b1",
+        "location": "dcos"
+      },
+      {
+        "name": "EXECUTOR_0",
+        "id": "29c5b974-caf3-4c85-b35a-5fe60b552fce",
+        "location": "dcos"
+      },
+      {
+        "name": "RABBIT",
+        "id": "b166fa78-0b5d-4f96-96fd-22b153d41f52",
+        "location": "dcos"
+      }
+    ],
+    "services": [
+      {
+        "init": {
+          "binding": "eager",
+          "singleton": true
+        },
+        "container_spec": {
+          "name": "lambda-provider",
+          "properties": {
+            "cpus": 0.25,
+            "memory": 768,
+            "accepted_resource_roles": [
+              "production",
+              "*"
+            ],
+            "env": {},
+            "num_instances": 1,
+            "network": "HOST",
+            "container_type": "DOCKER",
+            "image": "galacticfog/gestalt-laser:1.8.0-SNAPSHOT-ff457073",
+            "provider": {
+              "id": "520f64c1-16fe-4c42-998e-2eaa5cd8482c"
+            },
+            "labels": {
+              "HAPROXY_0_VHOST": "lambda2.test.galacticfog.com",
+              "HAPROXY_GROUP": "external"
+            },
+            "port_mappings": [
+              {
+                "name": "service",
+                "protocol": "tcp",
+                "service_port": 9000,
+                "expose_endpoint": true
+              }
+            ],
+            "cmd": "./bin/gestalt-laser -Dhttp.port=$PORT0 -J-Xmx1024m"
+          }
+        }
+      }
+    ]
+  }
+}

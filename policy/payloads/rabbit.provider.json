@@ -1,0 +1,56 @@
+{
+  "name": "brad-rabbit",
+  "description": "Optional description of this rabbit provider",
+  "resource_type": "Gestalt::Configuration::Provider::Messaging::RabbitMQ",
+  "properties": {
+    "config": {
+      "env": {
+        "public": {},
+        "private": {}
+      }
+    },
+    "linked_providers": [],
+    "services": [
+      {
+        "init": {
+          "binding": "eager",
+          "singleton": true
+        },
+        "container_spec": {
+          "name": "brad-rabbit",
+          "properties": {
+            "cpus": 0.2,
+            "memory": 1024,
+            "accepted_resource_roles": [
+              "production",
+              "*"
+            ],
+            "env": {},
+            "num_instances": 1,
+            "network": "BRIDGE",
+            "container_type": "DOCKER",
+            "image": "galacticfog/rabbit:dcos-0.2.0",
+            "provider": {
+              "id": "56c6e3ad-efad-4a15-af56-c4069904157a"
+            },
+            "labels": {},
+            "port_mappings": [
+              {
+                "name": "service",
+                "protocol": "tcp",
+                "container_port": 5672,
+                "expose_endpoint": true
+              },
+              {
+                "name": "http-url",
+                "protocol": "tcp",
+                "container_port": 15672,
+                "expose_endpoint": true
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

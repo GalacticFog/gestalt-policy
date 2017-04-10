@@ -1,0 +1,70 @@
+{
+  "name": "brad-policy-provider",
+  "description": "policy provider",
+  "resource_type": "Gestalt::Configuration::Provider::Lambda",
+  "properties": {
+    "config": {
+      "env": {
+        "public": {},
+        "private": {
+          "RABBIT_EXCHANGE": "policy-exchange",
+          "RABBIT_ROUTE": "policy",
+					"BINDING_UPDATE_SECONDS" : "10",
+					"POLICY_MIN_WORKERS" : "5",
+					"POLICY_MAX_WORKERS" : "20"
+        }
+      }
+    },
+    "linked_providers": [
+      {
+        "name": "LASER",
+        "id": "0d60d6b3-4eff-4147-bcd0-640542f556a7",
+        "location": "dcos"
+      },
+      {
+        "name": "RABBIT",
+        "id": "d834085a-c4b7-4ec4-8322-2545c5e92489",
+        "location": "dcos"
+      }
+    ],
+    "services": [
+      {
+        "init": {
+          "binding": "eager",
+          "singleton": true
+        },
+        "container_spec": {
+          "name": "gestalt-policy-provider",
+          "properties": {
+            "cpus": 0.2,
+            "memory": 768,
+            "accepted_resource_roles": [
+              "production",
+              "*"
+            ],
+            "env": {},
+            "num_instances": 1,
+            "network": "BRIDGE",
+            "container_type": "DOCKER",
+            "image": "galacticfog/gestalt-policy:0.1.0-SNAPSHOT-7334f722",
+            "provider": {
+              "id": "b1d41b2b-f6d2-4ca5-ad7b-4e9db8edba63"
+            },
+            "labels": {
+              "HAPROXY_0_VHOST": "default-policy.test.galacticfog.com",
+              "HAPROXY_GROUP": "external"
+            },
+            "port_mappings": [
+              {
+                "name": "service",
+                "protocol": "tcp",
+                "service_port": 9000,
+                "expose_endpoint": true
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
