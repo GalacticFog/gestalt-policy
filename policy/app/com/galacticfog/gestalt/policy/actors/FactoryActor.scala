@@ -19,7 +19,6 @@ import play.api.Logger
 class FactoryActor(
 
   rabbitConfig : RabbitConfig,
-  metaConfig : HostConfig,
   minWorkers : Int,
   maxWorkers : Int
 
@@ -191,12 +190,10 @@ class FactoryActor(
 object FactoryActor {
   def props(
     rabbitConfig : RabbitConfig,
-    metaConfig : HostConfig,
     minWorkers : Int,
     maxWorkers : Int
   ) : Props = Props( new FactoryActor(
       rabbitConfig,
-      metaConfig,
       minWorkers,
       maxWorkers
     )
