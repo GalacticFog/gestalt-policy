@@ -50,8 +50,9 @@ class InvokeActor( id : String, event : PolicyEvent, channel : Channel, envelope
         }
 
         val url = "/lambdas/" + lambdaId + "/invoke"
-        val payload = new LambdaEvent( event.event, event.args.payload )
-        val result = wsClient.easyPost( url, Json.toJson( payload ) )
+        val payload = event.args.payload
+        val params = Map( "eventName" -> event.event )
+        val result = wsClient.easyPost( url, payload, Some(params) )
 
       }
       catch {

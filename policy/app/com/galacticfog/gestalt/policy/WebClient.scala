@@ -84,13 +84,17 @@ class WebClient(val client: WSClient, val protocol: String, val hostname: String
     Await.result( future, timeout.duration )
   }
 
-  def post(endpoint: String, payload: JsValue): Future[JsValue] = genRequest(endpoint).post(payload).map(processResponse)
+  def post(endpoint: String, payload: JsValue, params : Option[Map[String,String]] = None ): Future[JsValue] = {
+    val request = genRequest( endpoint )
+    val finalRequest = params.foldLeft( request )( ( l, r ) => l.withQueryString( r.toSeq: _* ) )
+    finalRequest.post(payload).map(processResponse)
+  }
 
   def post(endpoint: String): Future[JsValue] = genRequest(endpoint).post("").map(processResponse)
 
-  def easyPost( endpoint : String, payload : JsValue) : Try[JsValue] = Try{
+  def easyPost( endpoint : String, payload : JsValue, params : Option[Map[String,String]] = None) : Try[JsValue] = Try{
     println( s"easyPost( $endpoint) : ${payload.toString()}" )
-    Await.result( post( endpoint, payload ), timeout.duration )
+    Await.result( post( endpoint, payload, params ), timeout.duration )
   }
 
   def easyPost( endpoint : String ) : Try[JsValue] = Try{
