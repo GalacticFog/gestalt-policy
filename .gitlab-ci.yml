@@ -68,7 +68,7 @@ github-publish:
     - cd policy
     - VERSION=$(grep "^version" build.sbt | sed 's/.*:=[ ]*//' | sed 's/"//g')
     - DOCKER_TAG=${CI_BUILD_TAG-$VERSION-${CI_BUILD_REF:0:8}}
-    - /usr/local/bin/update-deployed-app.sh  marathon.mesos:8080 gestalt-test-tasks/policy  $DOCKER_IMG:$DOCKER_TAG
+    - /usr/local/bin/update-deployed-app.sh  marathon.mesos:8080 root/default-policy-provider/services/gestalt-policy-provider $DOCKER_IMG:$DOCKER_TAG
   allow_failure: true
   artifacts:
 
