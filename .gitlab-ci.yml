@@ -11,7 +11,7 @@ cache:
 
 variables:
   DOCKER_IMG: "galacticfog/gestalt-policy"
-  CI_URL: https://gtw1.test.galacticfog.com/cd/update-provider
+  CI_URL: https://gtw1.demo.galacticfog.com/ci/update-provider
 
 test:
   stage: test
