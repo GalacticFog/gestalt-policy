@@ -34,6 +34,8 @@ docker-publish:
     - cd target/docker/stage
     - echo building $DOCKER_IMG:$DOCKER_TAG
     - docker build -t $DOCKER_IMG:$DOCKER_TAG .
+    - echo "Docker Login ..."
+    - echo ${GF_DOCKER_PWD} | docker login --username ${GF_DOCKER_USER} --password-stdin
     - docker push     $DOCKER_IMG:$DOCKER_TAG
     - |
       if [ ${CI_COMMIT_REF_NAME} == "master" ]; then
