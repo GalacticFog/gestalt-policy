@@ -39,6 +39,6 @@ resolvers ++= Seq(
 		"scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
 		"snapshots" at "http://scala-tools.org/repo-snapshots",
 		"releases"  at "http://scala-tools.org/repo-releases",
-        "gestalt-snapshots" at "https://galacticfog.artifactoryonline.com/galacticfog/libs-snapshots-local",
-        "gestalt-releases" at "https://galacticfog.artifactoryonline.com/galacticfog/libs-releases-local"
+        "gestalt-snapshots" at "https://galacticfog.jfrog.io/galacticfog/libs-snapshots-local",
+        "gestalt-releases" at "https://galacticfog.jfrog.io/galacticfog/libs-releases-local"
 		)
