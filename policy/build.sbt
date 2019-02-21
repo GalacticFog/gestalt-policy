@@ -2,11 +2,11 @@ import com.typesafe.sbt.packager.docker._
 
 name := """gestalt-policy"""
 
-version := "0.2.0-SNAPSHOT"
+version := "2.4.2-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala,SbtNativePackager)
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.12"
 
 libraryDependencies ++= Seq(
   jdbc,
@@ -24,7 +24,7 @@ dockerCommands := dockerCommands.value.flatMap {
   case other => List(other)
 }
 
-maintainer in Docker := "Brad Futch <brad@galacticfog.com>"
+maintainer in Docker := "Anthony Skipper <anthony@galacticfog.com>"
 
 
 libraryDependencies += "com.rabbitmq" % "amqp-client" % "3.6.1"
