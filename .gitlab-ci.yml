@@ -70,16 +70,17 @@ github-publish:
     - VERSION=$(grep "^version" build.sbt | sed 's/.*:=[ ]*//' | sed 's/"//g')
     - DOCKER_TAG=${CI_BUILD_TAG-$VERSION-${CI_BUILD_REF:0:8}}
     - http --check-status -a "$API_KEY":"$API_SECRET" --ignore-stdin $CI_URL image=$DOCKER_IMG:$DOCKER_TAG redeploy:=true provider_type=Policy git_ref=$CI_COMMIT_REF_NAME git_sha=$CI_COMMIT_SHA git_author="$GITLAB_USER_NAME"
-  allow_failure: true
   artifacts:
 
 auto-deploy-master:
   <<: *deploy_to_test
   only: 
     - master
+  allow_failure: false
 
 manual-deploy-non-master:
   <<: *deploy_to_test
   except: 
     - master
   when: manual
+  allow_failure: true
